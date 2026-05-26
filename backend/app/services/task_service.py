@@ -1,16 +1,22 @@
-"""
-Service layer for task business logic.
-Will contain full CRUD operations in later phases.
-"""
+from datetime import datetime, timezone
 
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app.models import Task
-from app.schemas import TaskCreate, TaskUpdate
+from app.schemas import TaskCreate, TaskUpdate, TaskStatus
 
 
-def get_all_tasks(db: Session) -> list[Task]:
-    return db.query(Task).all()
+def get_all_tasks(
+    db: Session,
+    status: TaskStatus | None = None,
+    skip: int = 0,
+    limit: int = 100,
+) -> list[Task]:
+    query = db.query(Task)
+    if status:
+        query = query.filter(Task.status == status.value)
+    return query.order_by(desc(Task.created_at)).offset(skip).limit(limit).all()
 
 
 def get_task_by_id(db: Session, task_id: int) -> Task | None:
@@ -18,7 +24,9 @@ def get_task_by_id(db: Session, task_id: int) -> Task | None:
 
 
 def create_task(db: Session, task_data: TaskCreate) -> Task:
-    task = Task(**task_data.model_dump())
+    data = task_data.model_dump()
+    data["status"] = data["status"].value
+    task = Task(**data)
     db.add(task)
     db.commit()
     db.refresh(task)
@@ -30,9 +38,13 @@ def update_task(db: Session, task_id: int, task_data: TaskUpdate) -> Task | None
     if not task:
         return None
 
-    for field, value in task_data.model_dump(exclude_unset=True).items():
+    updates = task_data.model_dump(exclude_unset=True)
+    if "status" in updates:
+        updates["status"] = updates["status"].value
+    for field, value in updates.items():
         setattr(task, field, value)
 
+    task.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(task)
     return task

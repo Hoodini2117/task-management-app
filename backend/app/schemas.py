@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class TaskStatus(str, Enum):
@@ -10,14 +10,23 @@ class TaskStatus(str, Enum):
     COMPLETED = "completed"
 
 
-class TaskCreate(BaseModel):
-    title: str
+class TaskBase(BaseModel):
+    @field_validator("title", mode="before", check_fields=False)
+    @classmethod
+    def strip_title(cls, v: str) -> str:
+        if isinstance(v, str):
+            return v.strip()
+        return v
+
+
+class TaskCreate(TaskBase):
+    title: str = Field(min_length=1, max_length=255)
     description: str | None = None
     status: TaskStatus = TaskStatus.PENDING
 
 
-class TaskUpdate(BaseModel):
-    title: str | None = None
+class TaskUpdate(TaskBase):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
     status: TaskStatus | None = None
 
