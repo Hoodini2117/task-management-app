@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f5f6fa;
+  color: #1e1e2d;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d0d3da;
+  border-radius: 3px;
+}
+
+/* Error */
+.error-banner {
+  background: #fff0f0;
+  color: #c0392b;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  border: 1px solid #fddede;
+}
+
+/* Loader */
+.loader {
+  text-align: center;
+  padding: 4rem 0;
+  color: #a0a3b1;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e8e9ef;
+  border-top-color: #7c6cfc;
+  border-radius: 50%;
+  margin: 0 auto 0.75rem;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  color: #b0b3c0;
+  padding: 3rem 0;
+  font-size: 0.92rem;
+}

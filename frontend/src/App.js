@@ -1,31 +1,38 @@
-import { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import TaskForm from './components/TaskForm';
-import TaskList from './components/TaskList';
-import Loader from './components/Loader';
+import { useState, useEffect, useCallback } from 'react';
+import DashboardLayout from './components/layout/DashboardLayout';
+import StatsCards from './components/stats/StatsCards';
+import TaskForm from './components/tasks/TaskForm';
+import TaskFilters from './components/tasks/TaskFilters';
+import TaskList from './components/tasks/TaskList';
+import Loader from './components/ui/Loader';
 import { getTasks, createTask, deleteTask } from './services/api';
-import './styles/main.css';
+import './styles/globals.css';
+import './styles/layout.css';
+import './styles/tasks.css';
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeFilter, setActiveFilter] = useState(null);
+  const [search, setSearch] = useState('');
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       setError('');
-      const res = await getTasks();
+      setLoading(true);
+      const res = await getTasks(activeFilter);
       setTasks(res.data);
     } catch (err) {
       setError('Failed to load tasks. Is the backend running?');
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeFilter]);
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [fetchTasks]);
 
   const handleCreate = async (taskData) => {
     await createTask(taskData);
@@ -41,21 +48,28 @@ function App() {
     }
   };
 
+  const filteredTasks = tasks.filter((t) =>
+    t.title.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <>
-      <Navbar />
-      <main className="container">
-        <TaskForm onTaskCreated={handleCreate} />
+    <DashboardLayout
+      tasks={tasks}
+      activeFilter={activeFilter}
+      onFilterChange={setActiveFilter}
+    >
+      <StatsCards tasks={tasks} />
+      <TaskForm onTaskCreated={handleCreate} />
+      <TaskFilters search={search} onSearchChange={setSearch} />
 
-        {error && <div className="error-banner">{error}</div>}
+      {error && <div className="error-banner">{error}</div>}
 
-        {loading ? (
-          <Loader />
-        ) : (
-          <TaskList tasks={tasks} onDelete={handleDelete} />
-        )}
-      </main>
-    </>
+      {loading ? (
+        <Loader />
+      ) : (
+        <TaskList tasks={filteredTasks} onDelete={handleDelete} />
+      )}
+    </DashboardLayout>
   );
 }
 
