@@ -4,6 +4,9 @@ const initialState = {
   title: '',
   description: '',
   status: 'pending',
+  priority: 'medium',
+  due_date: '',
+  due_time: '',
 };
 
 function TaskForm({ onTaskCreated }) {
@@ -24,7 +27,11 @@ function TaskForm({ onTaskCreated }) {
     }
 
     try {
-      await onTaskCreated(form);
+      await onTaskCreated({
+        ...form,
+        due_date: form.due_date || null,
+        due_time: form.due_time || null,
+      });
       setForm(initialState);
     } catch (err) {
       setError('Failed to create task');
@@ -50,16 +57,39 @@ function TaskForm({ onTaskCreated }) {
         placeholder="Description (optional)"
         value={form.description}
         onChange={handleChange}
-        rows={3}
+        rows={2}
       />
 
-      <select name="status" value={form.status} onChange={handleChange}>
-        <option value="pending">Pending</option>
-        <option value="in-progress">In Progress</option>
-        <option value="completed">Completed</option>
-      </select>
+      <div className="form-row">
+        <input
+          type="date"
+          name="due_date"
+          value={form.due_date}
+          onChange={handleChange}
+          title="Due date"
+        />
+        <input
+          type="time"
+          name="due_time"
+          value={form.due_time}
+          onChange={handleChange}
+          title="Due time"
+        />
+      </div>
 
-      <button type="submit">Create Task</button>
+      <div className="form-row">
+        <select name="status" value={form.status} onChange={handleChange}>
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        <select name="priority" value={form.priority} onChange={handleChange}>
+          <option value="low">🟢 Low</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="high">🔴 High</option>
+        </select>
+        <button type="submit">Create Task</button>
+      </div>
     </form>
   );
 }

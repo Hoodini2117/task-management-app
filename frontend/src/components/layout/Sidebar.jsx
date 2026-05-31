@@ -1,16 +1,18 @@
-import { FaTasks, FaCheckCircle, FaClock } from 'react-icons/fa';
+import { FaTasks, FaCheckCircle, FaClock, FaSpinner, FaHistory } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
 
 const navItems = [
-  { label: 'Dashboard', icon: <MdDashboard />, filter: null },
-  { label: 'All Tasks', icon: <FaTasks />, filter: null },
-  { label: 'Pending', icon: <FaClock />, filter: 'pending' },
-  { label: 'Completed', icon: <FaCheckCircle />, filter: 'completed' },
+  { label: 'Dashboard', icon: <MdDashboard />, view: 'dashboard' },
+  { label: 'All Tasks', icon: <FaTasks />, view: 'all' },
+  { label: 'Pending', icon: <FaClock />, view: 'pending' },
+  { label: 'In Progress', icon: <FaSpinner />, view: 'in-progress' },
+  { label: 'Completed', icon: <FaCheckCircle />, view: 'completed' },
+  { label: 'History', icon: <FaHistory />, view: 'history' },
 ];
 
-function Sidebar({ sidebarOpen, onClose, activeFilter, onFilterChange }) {
-  const handleClick = (filter) => {
-    onFilterChange(filter);
+function Sidebar({ sidebarOpen, onClose, activeView, onViewChange }) {
+  const handleClick = (view) => {
+    onViewChange(view);
     onClose();
   };
 
@@ -29,8 +31,8 @@ function Sidebar({ sidebarOpen, onClose, activeFilter, onFilterChange }) {
           {navItems.map((item) => (
             <li key={item.label}>
               <button
-                className={`nav-link ${activeFilter === item.filter ? 'active' : ''}`}
-                onClick={() => handleClick(item.filter)}
+                className={`nav-link ${activeView === item.view ? 'active' : ''}`}
+                onClick={() => handleClick(item.view)}
               >
                 <span className="nav-icon">{item.icon}</span>
                 {item.label}

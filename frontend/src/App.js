@@ -1,74 +1,133 @@
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from './components/layout/DashboardLayout';
-import StatsCards from './components/stats/StatsCards';
-import TaskForm from './components/tasks/TaskForm';
-import TaskFilters from './components/tasks/TaskFilters';
-import TaskList from './components/tasks/TaskList';
+import DashboardView from './components/views/DashboardView';
+import AllTasksView from './components/views/AllTasksView';
+import StatusTasksView from './components/views/StatusTasksView';
+import HistoryView from './components/views/HistoryView';
 import Loader from './components/ui/Loader';
-import { getTasks, createTask, deleteTask } from './services/api';
+import { getTasks, createTask, updateTask, deleteTask } from './services/api';
 import './styles/globals.css';
 import './styles/layout.css';
 import './styles/tasks.css';
 
+const statusViews = ['pending', 'in-progress', 'completed'];
+
 function App() {
-  const [tasks, setTasks] = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
+  const [viewTasks, setViewTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeFilter, setActiveFilter] = useState(null);
-  const [search, setSearch] = useState('');
+  const [activeView, setActiveView] = useState('dashboard');
 
-  const fetchTasks = useCallback(async () => {
+  const fetchAllTasks = useCallback(async () => {
+    try {
+      const res = await getTasks();
+      setAllTasks(res.data);
+    } catch (err) {
+      // silent — allTasks is for stats
+    }
+  }, []);
+
+  const fetchViewTasks = useCallback(async () => {
     try {
       setError('');
       setLoading(true);
-      const res = await getTasks(activeFilter);
-      setTasks(res.data);
+      const isStatus = statusViews.includes(activeView);
+      const res = await getTasks(isStatus ? activeView : null);
+      setViewTasks(res.data);
     } catch (err) {
       setError('Failed to load tasks. Is the backend running?');
     } finally {
       setLoading(false);
     }
-  }, [activeFilter]);
+  }, [activeView]);
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    fetchAllTasks();
+  }, [fetchAllTasks]);
+
+  useEffect(() => {
+    fetchViewTasks();
+  }, [fetchViewTasks]);
+
+  const refreshAll = () => {
+    fetchAllTasks();
+    fetchViewTasks();
+  };
 
   const handleCreate = async (taskData) => {
     await createTask(taskData);
-    fetchTasks();
+    refreshAll();
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await updateTask(id, { status: newStatus });
+      refreshAll();
+    } catch (err) {
+      setError('Failed to update task');
+    }
   };
 
   const handleDelete = async (id) => {
     try {
       await deleteTask(id);
-      setTasks(tasks.filter((t) => t.id !== id));
+      setAllTasks(allTasks.filter((t) => t.id !== id));
+      setViewTasks(viewTasks.filter((t) => t.id !== id));
     } catch (err) {
       setError('Failed to delete task');
     }
   };
 
-  const filteredTasks = tasks.filter((t) =>
-    t.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const renderView = () => {
+    if (loading && activeView !== 'history') return <Loader />;
+
+    switch (activeView) {
+      case 'dashboard':
+        return (
+          <DashboardView
+            tasks={allTasks}
+            onTaskCreated={handleCreate}
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+            onNavigate={setActiveView}
+          />
+        );
+      case 'all':
+        return (
+          <AllTasksView
+            tasks={viewTasks}
+            onTaskCreated={handleCreate}
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+          />
+        );
+      case 'pending':
+      case 'in-progress':
+      case 'completed':
+        return (
+          <StatusTasksView
+            status={activeView}
+            tasks={viewTasks}
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+          />
+        );
+      case 'history':
+        return <HistoryView />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <DashboardLayout
-      tasks={tasks}
-      activeFilter={activeFilter}
-      onFilterChange={setActiveFilter}
+      tasks={allTasks}
+      activeView={activeView}
+      onViewChange={setActiveView}
     >
-      <StatsCards tasks={tasks} />
-      <TaskForm onTaskCreated={handleCreate} />
-      <TaskFilters search={search} onSearchChange={setSearch} />
-
       {error && <div className="error-banner">{error}</div>}
-
-      {loading ? (
-        <Loader />
-      ) : (
-        <TaskList tasks={filteredTasks} onDelete={handleDelete} />
-      )}
+      {renderView()}
     </DashboardLayout>
   );
 }

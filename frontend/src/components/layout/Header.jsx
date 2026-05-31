@@ -1,9 +1,20 @@
 import { FaBars } from 'react-icons/fa';
 
-function Header({ tasks, onToggleSidebar }) {
+const viewTitles = {
+  dashboard: 'Dashboard',
+  all: 'All Tasks',
+  pending: 'Pending Tasks',
+  'in-progress': 'In Progress',
+  completed: 'Completed Tasks',
+  history: 'Task History',
+};
+
+function Header({ tasks, activeView, onToggleSidebar }) {
   const pending = tasks.filter((t) => t.status === 'pending').length;
   const inProgress = tasks.filter((t) => t.status === 'in-progress').length;
   const completed = tasks.filter((t) => t.status === 'completed').length;
+
+  const title = viewTitles[activeView] || 'Dashboard';
 
   return (
     <header className="dashboard-header">
@@ -13,7 +24,7 @@ function Header({ tasks, onToggleSidebar }) {
             <FaBars />
           </button>
           <p className="header-greeting">Welcome back</p>
-          <h2 className="header-title">Task Dashboard</h2>
+          <h2 className="header-title">{title}</h2>
         </div>
       </div>
 

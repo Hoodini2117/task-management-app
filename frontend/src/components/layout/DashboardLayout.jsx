@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
-function DashboardLayout({ tasks, activeFilter, onFilterChange, children }) {
+function DashboardLayout({ tasks, activeView, onViewChange, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -10,12 +10,13 @@ function DashboardLayout({ tasks, activeFilter, onFilterChange, children }) {
       <Sidebar
         sidebarOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        activeFilter={activeFilter}
-        onFilterChange={onFilterChange}
+        activeView={activeView}
+        onViewChange={onViewChange}
       />
       <div className="main-content">
         <Header
           tasks={tasks}
+          activeView={activeView}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
         <div className="content-area">
