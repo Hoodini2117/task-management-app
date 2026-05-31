@@ -1,4 +1,4 @@
-import { FaBars } from 'react-icons/fa';
+import { FaBars, FaPlus } from 'react-icons/fa';
 
 const viewTitles = {
   dashboard: 'Dashboard',
@@ -9,7 +9,7 @@ const viewTitles = {
   history: 'Task History',
 };
 
-function Header({ tasks, activeView, onToggleSidebar }) {
+function Header({ tasks, activeView, onToggleSidebar, onNewTask }) {
   const pending = tasks.filter((t) => t.status === 'pending').length;
   const inProgress = tasks.filter((t) => t.status === 'in-progress').length;
   const completed = tasks.filter((t) => t.status === 'completed').length;
@@ -26,6 +26,10 @@ function Header({ tasks, activeView, onToggleSidebar }) {
           <p className="header-greeting">Welcome back</p>
           <h2 className="header-title">{title}</h2>
         </div>
+        <button className="new-task-btn" onClick={onNewTask}>
+          <FaPlus style={{ marginRight: 6 }} />
+          New Task
+        </button>
       </div>
 
       <div className="header-stats">

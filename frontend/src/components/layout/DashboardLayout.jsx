@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
-function DashboardLayout({ tasks, activeView, onViewChange, children }) {
+function DashboardLayout({ tasks, activeView, onViewChange, onNewTask, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -18,6 +18,7 @@ function DashboardLayout({ tasks, activeView, onViewChange, children }) {
           tasks={tasks}
           activeView={activeView}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          onNewTask={onNewTask}
         />
         <div className="content-area">
           {children}

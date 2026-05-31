@@ -4,11 +4,13 @@ import DashboardView from './components/views/DashboardView';
 import AllTasksView from './components/views/AllTasksView';
 import StatusTasksView from './components/views/StatusTasksView';
 import HistoryView from './components/views/HistoryView';
+import NewTaskModal from './components/dashboard/NewTaskModal';
 import Loader from './components/ui/Loader';
 import { getTasks, createTask, updateTask, deleteTask } from './services/api';
 import './styles/globals.css';
 import './styles/layout.css';
 import './styles/tasks.css';
+import './styles/dashboard.css';
 
 const statusViews = ['pending', 'in-progress', 'completed'];
 
@@ -18,6 +20,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeView, setActiveView] = useState('dashboard');
+  const [modalOpen, setModalOpen] = useState(false);
 
   const fetchAllTasks = useCallback(async () => {
     try {
@@ -88,9 +91,6 @@ function App() {
           <DashboardView
             tasks={allTasks}
             onTaskCreated={handleCreate}
-            onDelete={handleDelete}
-            onStatusChange={handleStatusChange}
-            onNavigate={setActiveView}
           />
         );
       case 'all':
@@ -125,9 +125,15 @@ function App() {
       tasks={allTasks}
       activeView={activeView}
       onViewChange={setActiveView}
+      onNewTask={() => setModalOpen(true)}
     >
       {error && <div className="error-banner">{error}</div>}
       {renderView()}
+      <NewTaskModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onTaskCreated={handleCreate}
+      />
     </DashboardLayout>
   );
 }

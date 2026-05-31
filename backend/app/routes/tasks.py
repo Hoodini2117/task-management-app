@@ -5,7 +5,9 @@ from app.dependencies import get_db
 from app.schemas import TaskCreate, TaskUpdate, TaskResponse, TaskStatus, StatsResponse
 from app.services import task_service
 
-router = APIRouter(prefix="/api/tasks", tags=["tasks"])
+from app.core.config import settings
+
+router = APIRouter(prefix=f"/api/{settings.API_VERSION}/tasks", tags=["tasks"])
 
 
 @router.get("/", response_model=list[TaskResponse])
