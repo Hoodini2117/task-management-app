@@ -1,4 +1,4 @@
-import { FaBars } from 'react-icons/fa';
+import { FaBars, FaPlus } from 'react-icons/fa';
 
 const viewTitles = {
   dashboard: 'Dashboard',
@@ -9,37 +9,36 @@ const viewTitles = {
   history: 'Task History',
 };
 
-function Header({ tasks, activeView, onToggleSidebar }) {
-  const pending = tasks.filter((t) => t.status === 'pending').length;
-  const inProgress = tasks.filter((t) => t.status === 'in-progress').length;
-  const completed = tasks.filter((t) => t.status === 'completed').length;
+const viewSubtitles = {
+  dashboard: 'Overview of your productivity',
+  all: 'Manage all your tasks',
+  pending: 'Tasks waiting to be started',
+  'in-progress': 'Tasks currently in progress',
+  completed: 'Tasks you\'ve finished',
+  history: 'Complete task history log',
+};
 
+function Header({ tasks, activeView, onToggleSidebar, onNewTask }) {
   const title = viewTitles[activeView] || 'Dashboard';
+  const subtitle = viewSubtitles[activeView] || '';
 
   return (
     <header className="dashboard-header">
       <div className="header-top">
-        <div>
+        <div className="header-left">
           <button className="mobile-toggle" onClick={onToggleSidebar}>
             <FaBars />
           </button>
-          <p className="header-greeting">Welcome back</p>
-          <h2 className="header-title">{title}</h2>
+          <div className="header-titles">
+            <h2 className="header-title">{title}</h2>
+            <p className="header-subtitle">{subtitle}</p>
+          </div>
         </div>
-      </div>
-
-      <div className="header-stats">
-        <div className="stat-item">
-          <span className="stat-dot pending" />
-          {pending} Pending
-        </div>
-        <div className="stat-item">
-          <span className="stat-dot in-progress" />
-          {inProgress} In Progress
-        </div>
-        <div className="stat-item">
-          <span className="stat-dot completed" />
-          {completed} Completed
+        <div className="header-right">
+          <button className="btn-new-task" onClick={onNewTask}>
+            <FaPlus />
+            <span>New Task</span>
+          </button>
         </div>
       </div>
     </header>

@@ -5,6 +5,8 @@ import AllTasksView from './components/views/AllTasksView';
 import StatusTasksView from './components/views/StatusTasksView';
 import HistoryView from './components/views/HistoryView';
 import Loader from './components/ui/Loader';
+import { ThemeProvider } from './components/ui/ThemeProvider';
+import TaskModal from './components/tasks/TaskModal';
 import { getTasks, createTask, updateTask, deleteTask } from './services/api';
 import './styles/globals.css';
 import './styles/layout.css';
@@ -18,6 +20,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeView, setActiveView] = useState('dashboard');
+  const [showModal, setShowModal] = useState(false);
 
   const fetchAllTasks = useCallback(async () => {
     try {
@@ -121,14 +124,27 @@ function App() {
   };
 
   return (
-    <DashboardLayout
-      tasks={allTasks}
-      activeView={activeView}
-      onViewChange={setActiveView}
-    >
-      {error && <div className="error-banner">{error}</div>}
-      {renderView()}
-    </DashboardLayout>
+    <ThemeProvider>
+      <DashboardLayout
+        tasks={allTasks}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        onNewTask={() => setShowModal(true)}
+      >
+        {error && <div className="error-banner">{error}</div>}
+        {renderView()}
+      </DashboardLayout>
+
+      {showModal && (
+        <TaskModal
+          onClose={() => setShowModal(false)}
+          onTaskCreated={async (data) => {
+            await handleCreate(data);
+            setShowModal(false);
+          }}
+        />
+      )}
+    </ThemeProvider>
   );
 }
 

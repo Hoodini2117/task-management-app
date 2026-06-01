@@ -1,5 +1,4 @@
-import { FaTasks, FaClock, FaSpinner, FaCheckCircle, FaArchive, FaExclamationTriangle } from 'react-icons/fa';
-import { isOverdue } from '../../utils/dateUtils';
+import { FaTasks, FaClock, FaSpinner, FaCheckCircle, FaArchive } from 'react-icons/fa';
 
 function StatsCards({ tasks }) {
   const total = tasks.length;
@@ -7,22 +6,20 @@ function StatsCards({ tasks }) {
   const inProgress = tasks.filter((t) => t.status === 'in-progress').length;
   const completed = tasks.filter((t) => t.status === 'completed').length;
   const archived = tasks.filter((t) => t.is_archived).length;
-  const overdue = tasks.filter(isOverdue).length;
 
   const cards = [
-    { label: 'Total Tasks', count: total, icon: <FaTasks />, color: '#7c6cfc' },
-    { label: 'Pending', count: pending, icon: <FaClock />, color: '#f0ad4e' },
-    { label: 'In Progress', count: inProgress, icon: <FaSpinner />, color: '#5b9df0' },
-    { label: 'Completed', count: completed, icon: <FaCheckCircle />, color: '#51c98e' },
-    { label: 'Overdue', count: overdue, icon: <FaExclamationTriangle />, color: '#e67e22' },
-    { label: 'Archived', count: archived, icon: <FaArchive />, color: '#9b7fdb' },
+    { label: 'Total Tasks', count: total, icon: <FaTasks />, colorClass: 'stat-primary' },
+    { label: 'Pending', count: pending, icon: <FaClock />, colorClass: 'stat-warning' },
+    { label: 'In Progress', count: inProgress, icon: <FaSpinner />, colorClass: 'stat-info' },
+    { label: 'Completed', count: completed, icon: <FaCheckCircle />, colorClass: 'stat-success' },
+    { label: 'Archived', count: archived, icon: <FaArchive />, colorClass: 'stat-purple' },
   ];
 
   return (
     <div className="stats-grid">
       {cards.map((card) => (
-        <div className="stat-card" key={card.label}>
-          <div className="stat-card-icon" style={{ background: `${card.color}15`, color: card.color }}>
+        <div className={`stat-card ${card.colorClass}`} key={card.label}>
+          <div className="stat-card-icon">
             {card.icon}
           </div>
           <div className="stat-card-info">

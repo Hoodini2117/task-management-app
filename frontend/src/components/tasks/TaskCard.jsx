@@ -1,33 +1,17 @@
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { isOverdue, isDueToday } from '../../utils/dateUtils';
-import { getPriorityLabel } from '../../utils/taskUtils';
 
-function getTaskBadges(task) {
-  const badges = [];
+const priorityConfig = {
+  high: { label: 'High', className: 'priority-high' },
+  medium: { label: 'Medium', className: 'priority-medium' },
+  low: { label: 'Low', className: 'priority-low' },
+};
 
-  if (task.priority && task.priority !== 'medium') {
-    const cls = task.priority === 'high' ? 'badge-priority-high' : 'badge-priority-low';
-    badges.push({ label: getPriorityLabel(task.priority), className: cls });
-  } else if (task.priority === 'medium') {
-    badges.push({ label: getPriorityLabel('medium'), className: 'badge-priority-medium' });
-  }
-
-  if (task.status === 'completed') {
-    badges.push({ label: '✓ Completed', className: 'badge-completed' });
-  } else if (task.due_date) {
-    if (isDueToday(task)) {
-      badges.push({ label: '⏰ Due Today', className: 'badge-due-today' });
-    } else if (isOverdue(task)) {
-      badges.push({ label: '⚠ Overdue', className: 'badge-overdue' });
-    }
-  }
-
-  if (task.is_archived) {
-    badges.push({ label: '📦 Archived', className: 'badge-archived' });
-  }
-
-  return badges;
-}
+const statusConfig = {
+  pending: { label: 'Pending', className: 'status-pending' },
+  'in-progress': { label: 'In Progress', className: 'status-in-progress' },
+  completed: { label: 'Completed', className: 'status-completed' },
+};
 
 function formatDueDate(task) {
   if (!task.due_date) return null;
@@ -37,25 +21,31 @@ function formatDueDate(task) {
     day: 'numeric',
   });
   const time = task.due_time || '';
-  return `Due: ${label}${time ? ' · ' + time : ''}`;
+  return `${label}${time ? ' · ' + time : ''}`;
 }
 
-function TaskCard({ task, onDelete, onStatusChange }) {
+function TaskCard({ task, onDelete, onStatusChange, compact }) {
   const createdDate = new Date(task.created_at).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
 
-  const badges = getTaskBadges(task);
   const dueLabel = formatDueDate(task);
+  const overdue = isOverdue(task);
+  const dueToday = isDueToday(task);
+  const priority = priorityConfig[task.priority] || priorityConfig.medium;
 
   return (
-    <div className={`task-card${task.is_archived ? ' task-card-archived' : ''}`}>
+    <div className={`task-card${task.is_archived ? ' task-card-archived' : ''}${compact ? ' task-card-compact' : ''}`}>
       <div className="task-card-header">
-        <h3>{task.title}</h3>
+        <div className="task-card-title-row">
+          <h3 className="task-card-title">{task.title}</h3>
+          {overdue && <span className="urgency-dot urgency-overdue" title="Overdue" />}
+          {dueToday && !overdue && <span className="urgency-dot urgency-today" title="Due today" />}
+        </div>
         <select
-          className={`status-select status-${task.status}`}
+          className={`status-select ${statusConfig[task.status]?.className || ''}`}
           value={task.status}
           onChange={(e) => onStatusChange(task.id, e.target.value)}
         >
@@ -65,24 +55,32 @@ function TaskCard({ task, onDelete, onStatusChange }) {
         </select>
       </div>
 
-      {task.description && (
+      {task.description && !compact && (
         <p className="task-description">{task.description}</p>
       )}
 
-      {badges.length > 0 && (
-        <div className="task-badges">
-          {badges.map((b) => (
-            <span key={b.label} className={`task-badge ${b.className}`}>
-              {b.label}
-            </span>
-          ))}
-        </div>
-      )}
+      <div className="task-badges">
+        <span className={`pill ${priority.className}`}>{priority.label}</span>
+        {task.is_archived && (
+          <span className="pill pill-archived">Archived</span>
+        )}
+        {overdue && (
+          <span className="pill pill-overdue">Overdue</span>
+        )}
+        {dueToday && !overdue && (
+          <span className="pill pill-due-today">Due Today</span>
+        )}
+      </div>
 
       <div className="task-card-footer">
         <div className="task-meta">
-          <span className="task-date">{createdDate}</span>
-          {dueLabel && <span className="task-due">{dueLabel}</span>}
+          {!compact && <span className="task-date">{createdDate}</span>}
+          {dueLabel && (
+            <span className="task-due">
+              <FaCalendarAlt className="task-due-icon" />
+              {dueLabel}
+            </span>
+          )}
         </div>
         <button
           className="delete-btn"

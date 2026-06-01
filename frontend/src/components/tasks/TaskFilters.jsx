@@ -1,8 +1,4 @@
-import { FaSearch } from 'react-icons/fa';
-
 function TaskFilters({
-  search,
-  onSearchChange,
   statusFilter,
   onStatusFilterChange,
   dueDateFilter,
@@ -14,16 +10,6 @@ function TaskFilters({
 }) {
   return (
     <div className="task-filters">
-      <div className="search-input">
-        <FaSearch className="search-icon" />
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-        />
-      </div>
-
       <div className="filter-row">
         <select
           className="filter-select"
@@ -55,9 +41,9 @@ function TaskFilters({
           onChange={(e) => onPriorityFilterChange(e.target.value)}
         >
           <option value="">All Priorities</option>
-          <option value="high">🔴 High</option>
-          <option value="medium">🟡 Medium</option>
-          <option value="low">🟢 Low</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
         </select>
 
         <select
@@ -67,9 +53,8 @@ function TaskFilters({
         >
           <option value="newest">Newest Created</option>
           <option value="oldest">Oldest Created</option>
-          <option value="due-soonest">Due Soonest</option>
-          <option value="due-latest">Due Latest</option>
-          <option value="priority">High Priority First</option>
+          <option value="due-soonest">Nearest Due Date</option>
+          <option value="priority">Priority</option>
           <option value="completed">Recently Completed</option>
         </select>
       </div>

@@ -12,7 +12,12 @@ function StatusTasksView({ status, tasks, onDelete, onStatusChange }) {
   return (
     <div className="tasks-view">
       <div className="view-section">
-        <h3 className="section-title">{label} Tasks</h3>
+        <div className="section-header">
+          <h3 className="section-title">{label} Tasks</h3>
+          <span className="task-count-badge">
+            {tasks.length} task{tasks.length !== 1 ? 's' : ''}
+          </span>
+        </div>
         <TaskList tasks={tasks} onDelete={onDelete} onStatusChange={onStatusChange} />
       </div>
     </div>

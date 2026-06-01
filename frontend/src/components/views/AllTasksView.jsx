@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import TaskForm from '../tasks/TaskForm';
+import { FaSearch, FaPlus } from 'react-icons/fa';
+import TaskModal from '../tasks/TaskModal';
 import TaskFilters from '../tasks/TaskFilters';
 import QuickFilterChips from '../tasks/QuickFilterChips';
 import TaskList from '../tasks/TaskList';
@@ -12,6 +13,7 @@ function AllTasksView({ tasks, onTaskCreated, onDelete, onStatusChange }) {
   const [priorityFilter, setPriorityFilter] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [activeChip, setActiveChip] = useState('all');
+  const [showModal, setShowModal] = useState(false);
 
   const handleChipChange = (chip) => {
     setActiveChip(chip);
@@ -46,10 +48,28 @@ function AllTasksView({ tasks, onTaskCreated, onDelete, onStatusChange }) {
 
   return (
     <div className="tasks-view">
-      <TaskForm onTaskCreated={onTaskCreated} />
+      {/* Top Bar: Search + New Task */}
+      <div className="tasks-top-bar">
+        <div className="search-input">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <button className="btn-new-task" onClick={() => setShowModal(true)}>
+          <FaPlus />
+          <span>New Task</span>
+        </button>
+      </div>
+
+      {/* Quick Filter Chips */}
+      <QuickFilterChips activeChip={activeChip} onChipChange={handleChipChange} />
+
+      {/* Advanced Filters */}
       <TaskFilters
-        search={search}
-        onSearchChange={setSearch}
         statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
         dueDateFilter={dueDateFilter}
@@ -59,11 +79,25 @@ function AllTasksView({ tasks, onTaskCreated, onDelete, onStatusChange }) {
         sortBy={sortBy}
         onSortByChange={setSortBy}
       />
-      <QuickFilterChips activeChip={activeChip} onChipChange={handleChipChange} />
+
+      {/* Task Count */}
       <div className="task-count">
         {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''}
       </div>
+
+      {/* Task List */}
       <TaskList tasks={filteredTasks} onDelete={onDelete} onStatusChange={onStatusChange} />
+
+      {/* New Task Modal */}
+      {showModal && (
+        <TaskModal
+          onClose={() => setShowModal(false)}
+          onTaskCreated={async (data) => {
+            await onTaskCreated(data);
+            setShowModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }

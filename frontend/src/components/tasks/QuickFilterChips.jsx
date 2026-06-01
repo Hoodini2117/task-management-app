@@ -1,9 +1,9 @@
 const chips = [
   { key: 'all', label: 'All' },
-  { key: 'today', label: '📅 Due Today' },
-  { key: 'overdue', label: '⚠ Overdue' },
-  { key: 'high', label: '🔴 High Priority' },
-  { key: 'completed-today', label: '✓ Completed Today' },
+  { key: 'today', label: 'Due Today' },
+  { key: 'overdue', label: 'Overdue' },
+  { key: 'high', label: 'High Priority' },
+  { key: 'completed-today', label: 'Completed Today' },
 ];
 
 function QuickFilterChips({ activeChip, onChipChange }) {

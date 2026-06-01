@@ -2,12 +2,18 @@ import { useState, useEffect, useMemo } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { getHistory } from '../../services/api';
 import { formatFullDate, formatDateTime } from '../../utils/dateUtils';
-import { getPriorityLabel, filterBySearch, filterByPriority, sortTasks } from '../../utils/taskUtils';
+import { filterBySearch, filterByPriority, sortTasks } from '../../utils/taskUtils';
 
 const statusLabels = {
   pending: 'Pending',
   'in-progress': 'In Progress',
   completed: 'Completed',
+};
+
+const priorityLabels = {
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
 };
 
 function HistoryView() {
@@ -62,8 +68,12 @@ function HistoryView() {
   return (
     <div className="history-view">
       <div className="view-section">
-        <h3 className="section-title">All Task History</h3>
-        <p className="history-subtitle">{filteredTasks.length} of {tasks.length} tasks</p>
+        <div className="section-header">
+          <h3 className="section-title">All Task History</h3>
+          <span className="task-count-badge">
+            {filteredTasks.length} of {tasks.length} tasks
+          </span>
+        </div>
       </div>
 
       <div className="history-filters">
@@ -93,9 +103,9 @@ function HistoryView() {
             onChange={(e) => setPriorityFilter(e.target.value)}
           >
             <option value="">All Priorities</option>
-            <option value="high">🔴 High</option>
-            <option value="medium">🟡 Medium</option>
-            <option value="low">🟢 Low</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
           </select>
           <select
             className="filter-select"
@@ -143,7 +153,7 @@ function HistoryView() {
                 </td>
                 <td>
                   <span className={`priority-badge priority-${task.priority}`}>
-                    {getPriorityLabel(task.priority)}
+                    {priorityLabels[task.priority] || task.priority}
                   </span>
                 </td>
                 <td>

@@ -1,14 +1,15 @@
 import StatsCards from '../stats/StatsCards';
 import QuickCreate from '../tasks/QuickCreate';
 import TaskCard from '../tasks/TaskCard';
-import { FaArrowRight, FaExclamationTriangle, FaClock, FaCheckCircle, FaCalendarDay, FaCalendarWeek } from 'react-icons/fa';
-import { isOverdue, isDueToday, isDueThisWeek } from '../../utils/dateUtils';
+import { FaArrowRight, FaExclamationTriangle, FaClock, FaCheckCircle, FaCalendarDay, FaCalendarWeek, FaFire } from 'react-icons/fa';
+import { isOverdue, isDueToday, isDueThisWeek, isCompletedToday } from '../../utils/dateUtils';
 import { getPriorityLabel } from '../../utils/taskUtils';
 
 function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavigate }) {
   const overdueTasks = tasks.filter(isOverdue);
   const dueTodayTasks = tasks.filter(isDueToday);
   const dueThisWeekTasks = tasks.filter(isDueThisWeek);
+  const completedTodayTasks = tasks.filter(isCompletedToday);
 
   const upcomingTasks = tasks
     .filter((t) => {
@@ -26,145 +27,181 @@ function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavig
     .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))
     .slice(0, 5);
 
-  const recentTasks = tasks.slice(0, 5);
-
   return (
     <div className="dashboard-view">
+      {/* Top Stats Row */}
       <StatsCards tasks={tasks} />
 
-      {/* Deadline Insights */}
-      <div className="deadline-insights">
-        <div className="insight-card insight-today">
-          <div className="insight-icon">
-            <FaCalendarDay />
+      {/* Two-Column Dashboard Grid */}
+      <div className="dashboard-grid">
+        {/* Left Column — Deadline Focus */}
+        <div className="dashboard-col-left">
+          {/* Due Today */}
+          <div className="dashboard-panel">
+            <div className="panel-header">
+              <div className="panel-title-group">
+                <FaCalendarDay className="panel-icon panel-icon-info" />
+                <h3>Due Today</h3>
+              </div>
+              <span className="panel-count">{dueTodayTasks.length}</span>
+            </div>
+            {dueTodayTasks.length === 0 ? (
+              <p className="panel-empty">No tasks due today</p>
+            ) : (
+              <div className="panel-task-list">
+                {dueTodayTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onDelete={onDelete}
+                    onStatusChange={onStatusChange}
+                    compact
+                  />
+                ))}
+              </div>
+            )}
           </div>
-          <div className="insight-info">
-            <span className="insight-count">{dueTodayTasks.length}</span>
-            <span className="insight-label">Due Today</span>
-          </div>
-        </div>
-        <div className="insight-card insight-overdue">
-          <div className="insight-icon">
-            <FaExclamationTriangle />
-          </div>
-          <div className="insight-info">
-            <span className="insight-count">{overdueTasks.length}</span>
-            <span className="insight-label">Overdue</span>
-          </div>
-        </div>
-        <div className="insight-card insight-week">
-          <div className="insight-icon">
-            <FaCalendarWeek />
-          </div>
-          <div className="insight-info">
-            <span className="insight-count">{dueThisWeekTasks.length}</span>
-            <span className="insight-label">Due This Week</span>
-          </div>
-        </div>
-      </div>
 
-      <div className="view-section">
-        <h3 className="section-title">Quick Add</h3>
-        <QuickCreate onTaskCreated={onTaskCreated} />
-      </div>
+          {/* Overdue Tasks */}
+          {overdueTasks.length > 0 && (
+            <div className="dashboard-panel panel-overdue">
+              <div className="panel-header">
+                <div className="panel-title-group">
+                  <FaExclamationTriangle className="panel-icon panel-icon-danger" />
+                  <h3>Overdue</h3>
+                </div>
+                <span className="panel-count panel-count-danger">{overdueTasks.length}</span>
+              </div>
+              <div className="panel-task-list">
+                {overdueTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onDelete={onDelete}
+                    onStatusChange={onStatusChange}
+                    compact
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Overdue Tasks */}
-      {overdueTasks.length > 0 && (
-        <div className="view-section">
-          <div className="section-header">
-            <h3 className="section-title section-title-overdue">
-              <FaExclamationTriangle style={{ marginRight: 6 }} />
-              Overdue Tasks
-            </h3>
-          </div>
-          <div className="task-list">
-            {overdueTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onDelete={onDelete}
-                onStatusChange={onStatusChange}
-              />
-            ))}
+          {/* Due This Week */}
+          <div className="dashboard-panel">
+            <div className="panel-header">
+              <div className="panel-title-group">
+                <FaCalendarWeek className="panel-icon panel-icon-primary" />
+                <h3>Due This Week</h3>
+              </div>
+              <span className="panel-count">{dueThisWeekTasks.length}</span>
+            </div>
+            {dueThisWeekTasks.length === 0 ? (
+              <p className="panel-empty">No tasks due this week</p>
+            ) : (
+              <div className="panel-task-list">
+                {dueThisWeekTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onDelete={onDelete}
+                    onStatusChange={onStatusChange}
+                    compact
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Upcoming Deadlines */}
-      {upcomingTasks.length > 0 && (
-        <div className="view-section">
-          <div className="section-header">
-            <h3 className="section-title section-title-upcoming">
-              <FaClock style={{ marginRight: 6 }} />
-              Upcoming Deadlines
-            </h3>
+        {/* Right Column — Actions & Insights */}
+        <div className="dashboard-col-right">
+          {/* Quick Add */}
+          <div className="dashboard-panel">
+            <div className="panel-header">
+              <h3>Quick Add</h3>
+            </div>
+            <QuickCreate onTaskCreated={onTaskCreated} />
           </div>
-          <div className="upcoming-list">
-            {upcomingTasks.map((task) => (
-              <div key={task.id} className="upcoming-item">
-                <div className="upcoming-title">{task.title}</div>
-                <div className="upcoming-meta">
-                  <span className="upcoming-date">
-                    {new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
-                  <span className={`upcoming-priority priority-${task.priority}`}>
-                    {getPriorityLabel(task.priority)}
-                  </span>
+
+          {/* Today's Momentum */}
+          <div className="dashboard-panel panel-momentum">
+            <div className="panel-header">
+              <div className="panel-title-group">
+                <FaFire className="panel-icon panel-icon-success" />
+                <h3>Today's Momentum</h3>
+              </div>
+            </div>
+            <div className="momentum-content">
+              <span className="momentum-count">{completedTodayTasks.length}</span>
+              <span className="momentum-label">
+                task{completedTodayTasks.length !== 1 ? 's' : ''} completed today
+              </span>
+            </div>
+          </div>
+
+          {/* Upcoming Deadlines */}
+          {upcomingTasks.length > 0 && (
+            <div className="dashboard-panel">
+              <div className="panel-header">
+                <div className="panel-title-group">
+                  <FaClock className="panel-icon panel-icon-warning" />
+                  <h3>Upcoming Deadlines</h3>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+              <div className="upcoming-list">
+                {upcomingTasks.map((task) => (
+                  <div key={task.id} className="upcoming-item">
+                    <div className="upcoming-info">
+                      <span className="upcoming-title">{task.title}</span>
+                      <span className="upcoming-date">
+                        {new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                        {task.due_time && ` · ${task.due_time}`}
+                      </span>
+                    </div>
+                    <span className={`priority-pill priority-${task.priority}`}>
+                      {task.priority}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Recent Completions */}
-      {recentCompletions.length > 0 && (
-        <div className="view-section">
-          <div className="section-header">
-            <h3 className="section-title section-title-completions">
-              <FaCheckCircle style={{ marginRight: 6 }} />
-              Recent Completions
-            </h3>
-          </div>
-          <div className="task-list">
-            {recentCompletions.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onDelete={onDelete}
-                onStatusChange={onStatusChange}
-              />
-            ))}
-          </div>
+          {/* Recent Completions */}
+          {recentCompletions.length > 0 && (
+            <div className="dashboard-panel">
+              <div className="panel-header">
+                <div className="panel-title-group">
+                  <FaCheckCircle className="panel-icon panel-icon-success" />
+                  <h3>Recent Completions</h3>
+                </div>
+              </div>
+              <div className="upcoming-list">
+                {recentCompletions.map((task) => (
+                  <div key={task.id} className="upcoming-item">
+                    <div className="upcoming-info">
+                      <span className="upcoming-title">{task.title}</span>
+                      <span className="upcoming-date">
+                        {new Date(task.completed_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                        {' · '}
+                        {new Date(task.completed_at).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Recent Tasks */}
-      <div className="view-section">
-        <div className="section-header">
-          <h3 className="section-title">Recent Tasks</h3>
-          <button className="link-btn" onClick={() => onNavigate('all')}>
-            View all <FaArrowRight />
-          </button>
-        </div>
-
-        {recentTasks.length === 0 ? (
-          <p className="empty-state">No tasks yet. Add one above!</p>
-        ) : (
-          <div className="task-list">
-            {recentTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onDelete={onDelete}
-                onStatusChange={onStatusChange}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
