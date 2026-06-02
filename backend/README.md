@@ -1,7 +1,6 @@
 # Taskly — Task Management API
 
-A RESTful task management API built with FastAPI, SQLAlchemy, and SQLite. Supports task identifiers (TSK-XXXX), assignees, comments, activity tracking, and Kanban board views.
-
+Taskly is a modern full-stack task management application designed to help users organize, prioritize, and track their work efficiently. The application combines a FastAPI backend with a React frontend to provide a responsive and intuitive task management experience. Users can create tasks, assign priorities, manage statuses, track deadlines, and monitor overall productivity through a dashboard-driven interface. The project follows a layered architecture that separates API handling, business logic, validation, and data persistence. The backend exposes a RESTful API built with FastAPI and SQLAlchemy, while the frontend provides a modern user interface for managing tasks and visualizing task-related analytics. The application was developed with scalability and maintainability in mind, making it suitable for extension with advanced features such as task assignments, collaboration tools and overview boards,.
 ## Tech Stack
 
 - **Framework:** FastAPI 0.100+
