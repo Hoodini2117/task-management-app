@@ -4,7 +4,7 @@ import re
 from datetime import datetime, date
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # ─── Enums ──────────────────────────────────────────────────────────────────────
@@ -97,15 +97,17 @@ class TaskCreate(TaskBase):
     @field_validator("due_date")
     @classmethod
     def validate_due_date(cls, v: str | None) -> str | None:
-        """Validate due_date is a valid YYYY-MM-DD date string."""
+        """Validate due_date is a valid YYYY-MM-DD date and not in the past."""
         if v is None:
             return v
         if not _DATE_REGEX.match(v):
             raise ValueError("due_date must be in YYYY-MM-DD format")
         try:
-            date.fromisoformat(v)
+            parsed = date.fromisoformat(v)
         except ValueError:
             raise ValueError(f"Invalid date: {v}")
+        if parsed < date.today():
+            raise ValueError("Due date cannot be in the past")
         return v
 
     @field_validator("due_time")
