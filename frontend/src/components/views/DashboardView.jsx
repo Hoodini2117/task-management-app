@@ -1,11 +1,11 @@
 import StatsCards from '../stats/StatsCards';
 import QuickCreate from '../tasks/QuickCreate';
 import TaskCard from '../tasks/TaskCard';
-import { FaArrowRight, FaExclamationTriangle, FaClock, FaCheckCircle, FaCalendarDay, FaCalendarWeek, FaFire } from 'react-icons/fa';
+import { FaArrowRight, FaExclamationTriangle, FaClock, FaCheckCircle, FaCalendarDay, FaCalendarWeek, FaFire, FaUserFriends } from 'react-icons/fa';
 import { isOverdue, isDueToday, isDueThisWeek, isCompletedToday } from '../../utils/dateUtils';
 import { getPriorityLabel } from '../../utils/taskUtils';
 
-function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavigate }) {
+function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavigate, onTaskClick }) {
   const overdueTasks = tasks.filter(isOverdue);
   const dueTodayTasks = tasks.filter(isDueToday);
   const dueThisWeekTasks = tasks.filter(isDueThisWeek);
@@ -25,6 +25,11 @@ function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavig
   const recentCompletions = tasks
     .filter((t) => t.status === 'completed' && t.completed_at)
     .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))
+    .slice(0, 5);
+
+  const recentlyAssigned = tasks
+    .filter((t) => t.assignee_name && !t.is_archived)
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
     .slice(0, 5);
 
   return (
@@ -55,6 +60,7 @@ function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavig
                     task={task}
                     onDelete={onDelete}
                     onStatusChange={onStatusChange}
+                    onTaskClick={onTaskClick}
                     compact
                   />
                 ))}
@@ -79,6 +85,7 @@ function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavig
                     task={task}
                     onDelete={onDelete}
                     onStatusChange={onStatusChange}
+                    onTaskClick={onTaskClick}
                     compact
                   />
                 ))}
@@ -105,6 +112,7 @@ function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavig
                     task={task}
                     onDelete={onDelete}
                     onStatusChange={onStatusChange}
+                    onTaskClick={onTaskClick}
                     compact
                   />
                 ))}
@@ -138,6 +146,34 @@ function DashboardView({ tasks, onTaskCreated, onDelete, onStatusChange, onNavig
               </span>
             </div>
           </div>
+
+          {/* Recently Assigned Tasks */}
+          {recentlyAssigned.length > 0 && (
+            <div className="dashboard-panel">
+              <div className="panel-header">
+                <div className="panel-title-group">
+                  <FaUserFriends className="panel-icon panel-icon-primary" />
+                  <h3>Recently Assigned</h3>
+                </div>
+              </div>
+              <div className="upcoming-list">
+                {recentlyAssigned.map((task) => (
+                  <div key={task.id} className="upcoming-item" onClick={() => onTaskClick && onTaskClick(task)} style={{ cursor: 'pointer' }}>
+                    <div className="upcoming-info">
+                      <span className="upcoming-title">
+                        <span className="task-code-badge" style={{ marginRight: '0.4rem' }}>{task.task_code}</span>
+                        {task.title}
+                      </span>
+                      <span className="upcoming-date">
+                        {task.assignee_name}
+                        {task.assignee_email && ` · ${task.assignee_email}`}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Upcoming Deadlines */}
           {upcomingTasks.length > 0 && (

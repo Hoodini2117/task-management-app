@@ -6,7 +6,7 @@ import QuickFilterChips from '../tasks/QuickFilterChips';
 import TaskList from '../tasks/TaskList';
 import { filterBySearch, filterByDueDate, filterByPriority, applyQuickFilter, sortTasks } from '../../utils/taskUtils';
 
-function AllTasksView({ tasks, onTaskCreated, onDelete, onStatusChange }) {
+function AllTasksView({ tasks, onTaskCreated, onDelete, onStatusChange, onTaskClick }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dueDateFilter, setDueDateFilter] = useState('');
@@ -86,7 +86,7 @@ function AllTasksView({ tasks, onTaskCreated, onDelete, onStatusChange }) {
       </div>
 
       {/* Task List */}
-      <TaskList tasks={filteredTasks} onDelete={onDelete} onStatusChange={onStatusChange} />
+      <TaskList tasks={filteredTasks} onDelete={onDelete} onStatusChange={onStatusChange} onTaskClick={onTaskClick} />
 
       {/* New Task Modal */}
       {showModal && (

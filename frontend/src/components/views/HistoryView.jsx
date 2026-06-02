@@ -124,17 +124,24 @@ function HistoryView() {
         <table className="history-table">
           <thead>
             <tr>
+              <th>Task ID</th>
               <th>Title</th>
               <th>Status</th>
               <th>Priority</th>
+              <th>Assignee</th>
               <th>Due Date</th>
               <th>Created</th>
               <th>Completed</th>
+              <th>Comments</th>
+              <th>Activity</th>
             </tr>
           </thead>
           <tbody>
             {filteredTasks.map((task) => (
               <tr key={task.id} className={task.is_archived ? 'row-archived' : ''}>
+                <td>
+                  <span className="task-code-badge">{task.task_code}</span>
+                </td>
                 <td>
                   <div className="history-title-cell">
                     <span className="history-title">{task.title}</span>
@@ -157,6 +164,18 @@ function HistoryView() {
                   </span>
                 </td>
                 <td>
+                  {task.assignee_name ? (
+                    <div className="history-assignee">
+                      <span>{task.assignee_name}</span>
+                      {task.assignee_email && (
+                        <span className="history-desc">{task.assignee_email}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-muted">—</span>
+                  )}
+                </td>
+                <td>
                   {task.due_date ? (
                     <span>
                       {formatFullDate(task.due_date + 'T00:00:00')}
@@ -170,6 +189,12 @@ function HistoryView() {
                 </td>
                 <td>{formatDateTime(task.created_at)}</td>
                 <td>{formatDateTime(task.completed_at)}</td>
+                <td>
+                  <span className="history-count-badge">{task.comment_count || 0}</span>
+                </td>
+                <td>
+                  <span className="history-count-badge">{task.activity_count || 0}</span>
+                </td>
               </tr>
             ))}
           </tbody>

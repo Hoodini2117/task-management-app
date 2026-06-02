@@ -3,6 +3,7 @@ import { FaBars, FaPlus } from 'react-icons/fa';
 const viewTitles = {
   dashboard: 'Dashboard',
   all: 'All Tasks',
+  board: 'Board',
   pending: 'Pending Tasks',
   'in-progress': 'In Progress',
   completed: 'Completed Tasks',
@@ -12,6 +13,7 @@ const viewTitles = {
 const viewSubtitles = {
   dashboard: 'Overview of your productivity',
   all: 'Manage all your tasks',
+  board: 'Kanban board overview',
   pending: 'Tasks waiting to be started',
   'in-progress': 'Tasks currently in progress',
   completed: 'Tasks you\'ve finished',

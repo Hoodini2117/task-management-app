@@ -1,5 +1,5 @@
 import {
-  FaTasks, FaCheckCircle, FaClock, FaSpinner, FaHistory, FaSun, FaMoon,
+  FaTasks, FaCheckCircle, FaClock, FaSpinner, FaHistory, FaSun, FaMoon, FaColumns,
 } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
 import { useTheme } from '../ui/ThemeProvider';
@@ -7,6 +7,7 @@ import { useTheme } from '../ui/ThemeProvider';
 const navItems = [
   { label: 'Dashboard', icon: <MdDashboard />, view: 'dashboard' },
   { label: 'All Tasks', icon: <FaTasks />, view: 'all' },
+  { label: 'Board', icon: <FaColumns />, view: 'board' },
   { label: 'Pending', icon: <FaClock />, view: 'pending', countKey: 'pending' },
   { label: 'In Progress', icon: <FaSpinner />, view: 'in-progress', countKey: 'in-progress' },
   { label: 'Completed', icon: <FaCheckCircle />, view: 'completed', countKey: 'completed' },

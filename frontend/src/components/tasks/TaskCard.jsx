@@ -1,4 +1,4 @@
-import { FaTrash, FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { FaTrash, FaCalendarAlt, FaClock, FaUser } from 'react-icons/fa';
 import { isOverdue, isDueToday } from '../../utils/dateUtils';
 
 const priorityConfig = {
@@ -24,7 +24,7 @@ function formatDueDate(task) {
   return `${label}${time ? ' · ' + time : ''}`;
 }
 
-function TaskCard({ task, onDelete, onStatusChange, compact }) {
+function TaskCard({ task, onDelete, onStatusChange, onTaskClick, compact }) {
   const createdDate = new Date(task.created_at).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -36,10 +36,20 @@ function TaskCard({ task, onDelete, onStatusChange, compact }) {
   const dueToday = isDueToday(task);
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
 
+  const handleCardClick = () => {
+    if (onTaskClick) onTaskClick(task);
+  };
+
   return (
-    <div className={`task-card${task.is_archived ? ' task-card-archived' : ''}${compact ? ' task-card-compact' : ''}`}>
+    <div
+      className={`task-card${task.is_archived ? ' task-card-archived' : ''}${compact ? ' task-card-compact' : ''}${onTaskClick ? ' task-card-clickable' : ''}`}
+      onClick={handleCardClick}
+    >
       <div className="task-card-header">
         <div className="task-card-title-row">
+          {task.task_code && (
+            <span className="task-code-badge">{task.task_code}</span>
+          )}
           <h3 className="task-card-title">{task.title}</h3>
           {overdue && <span className="urgency-dot urgency-overdue" title="Overdue" />}
           {dueToday && !overdue && <span className="urgency-dot urgency-today" title="Due today" />}
@@ -47,7 +57,8 @@ function TaskCard({ task, onDelete, onStatusChange, compact }) {
         <select
           className={`status-select ${statusConfig[task.status]?.className || ''}`}
           value={task.status}
-          onChange={(e) => onStatusChange(task.id, e.target.value)}
+          onChange={(e) => { e.stopPropagation(); onStatusChange(task.id, e.target.value); }}
+          onClick={(e) => e.stopPropagation()}
         >
           <option value="pending">Pending</option>
           <option value="in-progress">In Progress</option>
@@ -81,10 +92,16 @@ function TaskCard({ task, onDelete, onStatusChange, compact }) {
               {dueLabel}
             </span>
           )}
+          {task.assignee_name && (
+            <span className="task-assignee">
+              <FaUser className="task-assignee-icon" />
+              {task.assignee_name}
+            </span>
+          )}
         </div>
         <button
           className="delete-btn"
-          onClick={() => onDelete(task.id)}
+          onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
           title="Delete task"
         >
           <FaTrash />

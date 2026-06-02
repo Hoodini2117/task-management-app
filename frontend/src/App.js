@@ -4,9 +4,11 @@ import DashboardView from './components/views/DashboardView';
 import AllTasksView from './components/views/AllTasksView';
 import StatusTasksView from './components/views/StatusTasksView';
 import HistoryView from './components/views/HistoryView';
+import BoardView from './components/views/BoardView';
 import Loader from './components/ui/Loader';
 import { ThemeProvider } from './components/ui/ThemeProvider';
 import TaskModal from './components/tasks/TaskModal';
+import TaskDetailModal from './components/tasks/TaskDetailModal';
 import { getTasks, createTask, updateTask, deleteTask } from './services/api';
 import './styles/globals.css';
 import './styles/layout.css';
@@ -21,6 +23,7 @@ function App() {
   const [error, setError] = useState('');
   const [activeView, setActiveView] = useState('dashboard');
   const [showModal, setShowModal] = useState(false);
+  const [detailTask, setDetailTask] = useState(null);
 
   const fetchAllTasks = useCallback(async () => {
     try {
@@ -82,6 +85,10 @@ function App() {
     }
   };
 
+  const handleTaskClick = (task) => {
+    setDetailTask(task);
+  };
+
   const renderView = () => {
     if (loading && activeView !== 'history') return <Loader />;
 
@@ -94,6 +101,7 @@ function App() {
             onDelete={handleDelete}
             onStatusChange={handleStatusChange}
             onNavigate={setActiveView}
+            onTaskClick={handleTaskClick}
           />
         );
       case 'all':
@@ -103,6 +111,16 @@ function App() {
             onTaskCreated={handleCreate}
             onDelete={handleDelete}
             onStatusChange={handleStatusChange}
+            onTaskClick={handleTaskClick}
+          />
+        );
+      case 'board':
+        return (
+          <BoardView
+            tasks={allTasks}
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+            onTaskClick={handleTaskClick}
           />
         );
       case 'pending':
@@ -114,6 +132,7 @@ function App() {
             tasks={viewTasks}
             onDelete={handleDelete}
             onStatusChange={handleStatusChange}
+            onTaskClick={handleTaskClick}
           />
         );
       case 'history':
@@ -142,6 +161,14 @@ function App() {
             await handleCreate(data);
             setShowModal(false);
           }}
+        />
+      )}
+
+      {detailTask && (
+        <TaskDetailModal
+          task={detailTask}
+          onClose={() => setDetailTask(null)}
+          onRefresh={refreshAll}
         />
       )}
     </ThemeProvider>

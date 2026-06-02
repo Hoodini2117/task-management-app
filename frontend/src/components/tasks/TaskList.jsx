@@ -1,6 +1,6 @@
 import TaskCard from './TaskCard';
 
-function TaskList({ tasks, onDelete, onStatusChange }) {
+function TaskList({ tasks, onDelete, onStatusChange, onTaskClick }) {
   if (tasks.length === 0) {
     return <p className="empty-state">No tasks yet. Create one above!</p>;
   }
@@ -13,6 +13,7 @@ function TaskList({ tasks, onDelete, onStatusChange }) {
           task={task}
           onDelete={onDelete}
           onStatusChange={onStatusChange}
+          onTaskClick={onTaskClick}
         />
       ))}
     </div>

@@ -35,7 +35,14 @@ export function filterByPriority(tasks, priority) {
 export function filterBySearch(tasks, search) {
   if (!search) return tasks;
   const q = search.toLowerCase();
-  return tasks.filter((t) => t.title.toLowerCase().includes(q));
+  return tasks.filter((t) => {
+    if (t.title.toLowerCase().includes(q)) return true;
+    if (t.description && t.description.toLowerCase().includes(q)) return true;
+    if (t.task_code && t.task_code.toLowerCase().includes(q)) return true;
+    if (t.assignee_name && t.assignee_name.toLowerCase().includes(q)) return true;
+    if (t.assignee_email && t.assignee_email.toLowerCase().includes(q)) return true;
+    return false;
+  });
 }
 
 export function applyQuickFilter(tasks, chip) {

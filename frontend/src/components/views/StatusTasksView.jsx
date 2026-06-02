@@ -6,7 +6,7 @@ const statusLabels = {
   completed: 'Completed',
 };
 
-function StatusTasksView({ status, tasks, onDelete, onStatusChange }) {
+function StatusTasksView({ status, tasks, onDelete, onStatusChange, onTaskClick }) {
   const label = statusLabels[status] || status;
 
   return (
@@ -18,7 +18,7 @@ function StatusTasksView({ status, tasks, onDelete, onStatusChange }) {
             {tasks.length} task{tasks.length !== 1 ? 's' : ''}
           </span>
         </div>
-        <TaskList tasks={tasks} onDelete={onDelete} onStatusChange={onStatusChange} />
+        <TaskList tasks={tasks} onDelete={onDelete} onStatusChange={onStatusChange} onTaskClick={onTaskClick} />
       </div>
     </div>
   );

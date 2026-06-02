@@ -8,6 +8,8 @@ const initialState = {
   priority: 'medium',
   due_date: '',
   due_time: '',
+  assignee_name: '',
+  assignee_email: '',
 };
 
 function TaskModal({ onClose, onTaskCreated }) {
@@ -50,6 +52,8 @@ function TaskModal({ onClose, onTaskCreated }) {
         ...form,
         due_date: form.due_date || null,
         due_time: form.due_time || null,
+        assignee_name: form.assignee_name.trim() || null,
+        assignee_email: form.assignee_email.trim() || null,
       });
     } catch (err) {
       setError('Failed to create task');
@@ -144,6 +148,33 @@ function TaskModal({ onClose, onTaskCreated }) {
                 name="due_time"
                 value={form.due_time}
                 onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="modal-row">
+            <div className="modal-field">
+              <label htmlFor="modal-assignee-name">Assigned To</label>
+              <input
+                id="modal-assignee-name"
+                type="text"
+                name="assignee_name"
+                placeholder="Name"
+                value={form.assignee_name}
+                onChange={handleChange}
+                autoComplete="off"
+              />
+            </div>
+            <div className="modal-field">
+              <label htmlFor="modal-assignee-email">Assignee Email</label>
+              <input
+                id="modal-assignee-email"
+                type="email"
+                name="assignee_email"
+                placeholder="email@example.com"
+                value={form.assignee_email}
+                onChange={handleChange}
+                autoComplete="off"
               />
             </div>
           </div>

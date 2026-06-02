@@ -1075,3 +1075,551 @@
     font-size: 0.78rem;
   }
 }
+
+/* =============================================
+   TASK CODE BADGE
+   ============================================= */
+
+.task-code-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* =============================================
+   TASK ASSIGNEE (Card Footer)
+   ============================================= */
+
+.task-assignee {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.task-assignee-icon {
+  font-size: 0.62rem;
+  opacity: 0.7;
+}
+
+/* =============================================
+   TASK CARD CLICKABLE
+   ============================================= */
+
+.task-card-clickable {
+  cursor: pointer;
+}
+
+/* =============================================
+   TASK DETAIL MODAL
+   ============================================= */
+
+.detail-modal-container {
+  max-width: 680px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-modal-header {
+  gap: 0.75rem;
+}
+
+.detail-header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-header-info h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-modal-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Detail Grid */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 0.85rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.detail-icon {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.detail-email {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--primary);
+  text-decoration: none;
+  margin-left: 0.25rem;
+}
+
+.detail-email:hover {
+  text-decoration: underline;
+}
+
+/* Detail Description */
+.detail-description {
+  margin-bottom: 1.25rem;
+  padding: 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+
+.detail-description p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-top: 0.35rem;
+}
+
+/* Detail Tabs */
+.detail-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1.5px solid var(--border);
+  padding-bottom: 0;
+}
+
+.detail-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: -1.5px;
+}
+
+.detail-tab:hover {
+  color: var(--text);
+}
+
+.detail-tab-active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+/* Detail Section */
+.detail-section {
+  min-height: 100px;
+}
+
+/* =============================================
+   COMMENTS
+   ============================================= */
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.comment-author-input,
+.comment-message-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--border-input);
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text);
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.comment-author-input:focus,
+.comment-message-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg-input-focus);
+}
+
+.comment-author-input::placeholder,
+.comment-message-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.comment-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.comment-input-row .comment-message-input {
+  flex: 1;
+}
+
+.comment-send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+}
+
+.comment-send-btn:hover {
+  background: var(--primary-hover);
+}
+
+.comment-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.comment-item {
+  position: relative;
+  padding: 0.75rem 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  transition: background-color 0.15s;
+}
+
+.comment-item:hover {
+  background: var(--bg-card-hover);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.comment-author {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.comment-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.comment-message {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.comment-delete-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  font-size: 0.68rem;
+  padding: 0.2rem;
+  border-radius: 4px;
+  transition: all 0.15s;
+  opacity: 0;
+}
+
+.comment-item:hover .comment-delete-btn {
+  opacity: 1;
+}
+
+.comment-delete-btn:hover {
+  color: var(--danger);
+  background: var(--danger-light);
+}
+
+/* =============================================
+   ACTIVITY TIMELINE
+   ============================================= */
+
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 0.5rem;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  position: relative;
+  padding-bottom: 0.85rem;
+  padding-left: 0.75rem;
+}
+
+.timeline-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 0.25rem;
+  top: 1rem;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--border);
+}
+
+.timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  margin-top: 0.35rem;
+  position: relative;
+  z-index: 1;
+  left: -0.75rem;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+  margin-left: -0.5rem;
+}
+
+.timeline-action {
+  font-size: 0.84rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.timeline-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* =============================================
+   KANBAN BOARD
+   ============================================= */
+
+.board-view {
+  width: 100%;
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.kanban-column {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  min-height: 200px;
+  transition: all 0.2s ease;
+}
+
+.kanban-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 2px solid var(--border-light);
+}
+
+.kanban-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kanban-icon {
+  font-size: 0.88rem;
+}
+
+.board-col-warning .kanban-icon {
+  color: var(--warning);
+}
+
+.board-col-info .kanban-icon {
+  color: var(--info);
+}
+
+.board-col-success .kanban-icon {
+  color: var(--success);
+}
+
+.board-col-warning .kanban-header {
+  border-bottom-color: var(--warning);
+}
+
+.board-col-info .kanban-header {
+  border-bottom-color: var(--info);
+}
+
+.board-col-success .kanban-header {
+  border-bottom-color: var(--success);
+}
+
+.kanban-header h3 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.kanban-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kanban-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  padding: 2rem 0;
+  font-weight: 400;
+}
+
+/* =============================================
+   HISTORY ENHANCEMENTS
+   ============================================= */
+
+.history-assignee {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.history-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 0.35rem;
+}
+
+/* =============================================
+   RESPONSIVE — New components
+   ============================================= */
+
+@media (max-width: 1024px) {
+  .kanban-board {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .kanban-column {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-modal-container {
+    max-width: 100%;
+    max-height: 90vh;
+  }
+
+  .comment-input-row {
+    flex-direction: column;
+  }
+
+  .comment-send-btn {
+    width: 100%;
+    height: 36px;
+  }
+
+  .kanban-board {
+    grid-template-columns: 1fr;
+  }
+}
