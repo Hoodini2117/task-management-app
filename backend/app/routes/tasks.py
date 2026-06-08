@@ -10,9 +10,11 @@ from app.schemas import (
 )
 from app.services import task_service
 
+# Task router — all endpoints prefixed with /api/tasks
 router = APIRouter(prefix="/api/tasks", tags=["Tasks"])
 
 
+# Retrieve paginated tasks with optional filtering and full-text search
 @router.get(
     "/",
     response_model=list[TaskResponse],
@@ -41,6 +43,7 @@ def list_tasks(
     limit: int = Query(default=100, ge=1, le=200, description="Maximum records to return"),
     db: Session = Depends(get_db),
 ):
+    # Delegate filtering and pagination to the service layer
     return task_service.get_all_tasks(
         db,
         status=status,
@@ -52,6 +55,7 @@ def list_tasks(
     )
 
 
+# Return aggregate task counts for dashboard statistics cards
 @router.get(
     "/stats",
     response_model=StatsResponse,
@@ -62,6 +66,7 @@ def get_stats(db: Session = Depends(get_db)):
     return task_service.get_stats(db)
 
 
+# Fetch complete task history including archived tasks for the audit view
 @router.get(
     "/history",
     response_model=list[TaskResponse],
@@ -79,6 +84,7 @@ def get_history(
     return task_service.get_history(db, skip=skip, limit=limit)
 
 
+# Retrieve a single task by its database primary key
 @router.get(
     "/{task_id}",
     response_model=TaskResponse,
@@ -93,6 +99,7 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     return task
 
 
+# Create a new task with auto-generated task code and activity log
 @router.post(
     "/",
     response_model=TaskResponse,
@@ -112,6 +119,7 @@ def create_task(task_data: TaskCreate, db: Session = Depends(get_db)):
     return task_service.create_task(db, task_data)
 
 
+# Partially update a task — only provided fields are modified
 @router.put(
     "/{task_id}",
     response_model=TaskResponse,
@@ -134,6 +142,7 @@ def update_task(task_id: int, task_data: TaskUpdate, db: Session = Depends(get_d
     return task
 
 
+# Permanently delete a task and all associated comments/activity logs
 @router.delete(
     "/{task_id}",
     status_code=204,

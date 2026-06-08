@@ -8,9 +8,11 @@ from app.schemas import CommentCreate, CommentResponse, ErrorResponse
 from app.services import comment_service
 from app.services import task_service
 
+# Comments router — nested under /api/tasks/{task_id}/comments
 router = APIRouter(prefix="/api/tasks", tags=["Comments"])
 
 
+# List all comments for a specific task, ordered newest first
 @router.get(
     "/{task_id}/comments",
     response_model=list[CommentResponse],
@@ -19,12 +21,14 @@ router = APIRouter(prefix="/api/tasks", tags=["Comments"])
     responses={404: {"model": ErrorResponse, "description": "Task not found"}},
 )
 def list_comments(task_id: int, db: Session = Depends(get_db)):
+    # Verify task exists before querying comments
     task = task_service.get_task_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail=f"Task with id={task_id} not found")
     return comment_service.get_comments(db, task_id)
 
 
+# Add a new comment to a task and auto-create an activity log entry
 @router.post(
     "/{task_id}/comments",
     response_model=CommentResponse,
@@ -41,12 +45,14 @@ def list_comments(task_id: int, db: Session = Depends(get_db)):
     },
 )
 def create_comment(task_id: int, data: CommentCreate, db: Session = Depends(get_db)):
+    # Verify task exists before creating comment
     task = task_service.get_task_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail=f"Task with id={task_id} not found")
     return comment_service.create_comment(db, task_id, data)
 
 
+# Permanently delete a comment by its ID
 @router.delete(
     "/{task_id}/comments/{comment_id}",
     status_code=204,

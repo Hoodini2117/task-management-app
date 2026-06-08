@@ -17,6 +17,7 @@ def get_comments(db: Session, task_id: int) -> list[Comment]:
 
 def create_comment(db: Session, task_id: int, data: CommentCreate) -> Comment:
     """Add a comment and create an activity log entry."""
+    # Persist the new comment
     comment = Comment(
         task_id=task_id,
         author_name=data.author_name,
@@ -24,6 +25,7 @@ def create_comment(db: Session, task_id: int, data: CommentCreate) -> Comment:
     )
     db.add(comment)
 
+    # Record the comment action in the task's activity timeline
     log = ActivityLog(
         task_id=task_id,
         action=f"Comment added by {data.author_name}",

@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 from app.models import Task, ActivityLog
 from app.schemas import TaskCreate, TaskUpdate, TaskStatus
 
+# Completed tasks are auto-archived after this many days
 ARCHIVE_AFTER_DAYS = 10
 
+# Human-readable labels for activity log messages
 STATUS_LABELS = {
     "pending": "Pending",
     "in-progress": "In Progress",
@@ -23,6 +25,7 @@ PRIORITY_LABELS = {
 
 def _next_task_code(db: Session) -> tuple[int, str]:
     """Generate the next task_sequence and task_code."""
+    # Query the current max sequence to generate the next incremental code
     max_seq = db.query(func.max(Task.task_sequence)).scalar()
     next_seq = (max_seq or 0) + 1
     code = f"TSK-{next_seq:04d}"
@@ -52,6 +55,7 @@ def _task_to_response_dict(task: Task) -> dict:
         "is_archived": task.is_archived,
         "created_at": task.created_at,
         "updated_at": task.updated_at,
+        # Compute relationship counts eagerly loaded via selectin
         "comment_count": len(task.comments) if task.comments else 0,
         "activity_count": len(task.activity_logs) if task.activity_logs else 0,
     }
@@ -60,6 +64,7 @@ def _task_to_response_dict(task: Task) -> dict:
 def archive_stale_tasks(db: Session) -> None:
     """Archive completed tasks older than ARCHIVE_AFTER_DAYS."""
     cutoff = datetime.now(timezone.utc) - timedelta(days=ARCHIVE_AFTER_DAYS)
+    # Find completed, non-archived tasks that passed the cutoff threshold
     stale = (
         db.query(Task)
         .filter(
@@ -77,6 +82,7 @@ def archive_stale_tasks(db: Session) -> None:
         db.commit()
 
 
+# Core query method — supports filtering, search, pagination, and archive toggling
 def get_all_tasks(
     db: Session,
     status: TaskStatus | None = None,
@@ -86,15 +92,18 @@ def get_all_tasks(
     limit: int = 100,
     search: str | None = None,
 ) -> list[dict]:
+    # Auto-archive stale completed tasks before returning results
     archive_stale_tasks(db)
 
     query = db.query(Task)
+    # Apply optional filters progressively
     if status:
         query = query.filter(Task.status == status.value)
     if priority:
         query = query.filter(Task.priority == priority)
     if not include_archived:
         query = query.filter(Task.is_archived == False)  # noqa: E712
+    # Full-text search across multiple columns using ILIKE
     if search:
         search_term = f"%{search}%"
         query = query.filter(
@@ -118,23 +127,28 @@ def get_task_by_id(db: Session, task_id: int) -> dict | None:
 
 
 def create_task(db: Session, task_data: TaskCreate) -> dict:
+    # Convert Pydantic model to dict and extract enum values
     data = task_data.model_dump()
     data["status"] = data["status"].value
     data["priority"] = data["priority"].value
 
+    # Auto-set completion timestamp if task is created as completed
     if data["status"] == TaskStatus.COMPLETED.value:
         data["completed_at"] = datetime.now(timezone.utc)
 
+    # Generate unique sequential task code (TSK-XXXX)
     seq, code = _next_task_code(db)
     data["task_sequence"] = seq
     data["task_code"] = code
 
     task = Task(**data)
     db.add(task)
+    # Flush to get the auto-generated ID before creating activity logs
     db.flush()
 
     _create_activity(db, task.id, "Task Created")
 
+    # Log initial assignment if an assignee was provided at creation
     if task.assignee_name:
         _create_activity(db, task.id, f"Assigned to {task.assignee_name}")
 
@@ -148,11 +162,14 @@ def update_task(db: Session, task_id: int, task_data: TaskUpdate) -> dict | None
     if not task:
         return None
 
+    # Only process fields that were explicitly sent in the request
     updates = task_data.model_dump(exclude_unset=True)
+    # Capture old values for activity log diff detection
     old_status = task.status
     old_priority = task.priority
     old_assignee = task.assignee_name
 
+    # Handle status transition side effects (completed_at, is_archived)
     if "status" in updates:
         new_status = updates["status"].value
         updates["status"] = new_status
@@ -167,6 +184,7 @@ def update_task(db: Session, task_id: int, task_data: TaskUpdate) -> dict | None
     if "priority" in updates:
         updates["priority"] = updates["priority"].value
 
+    # Apply all updates to the ORM object dynamically
     for field, value in updates.items():
         setattr(task, field, value)
 
@@ -184,6 +202,7 @@ def update_task(db: Session, task_id: int, task_data: TaskUpdate) -> dict | None
         new_label = PRIORITY_LABELS.get(updates["priority"], updates["priority"])
         _create_activity(db, task.id, f"Priority changed: {old_label} → {new_label}")
 
+    # Track assignee changes — distinguish between reassign and unassign
     if "assignee_name" in updates:
         new_assignee = updates["assignee_name"]
         if new_assignee != old_assignee:
@@ -202,6 +221,7 @@ def delete_task(db: Session, task_id: int) -> bool:
     if not task:
         return False
 
+    # Cascade delete removes associated comments and activity logs
     db.delete(task)
     db.commit()
     return True
@@ -234,6 +254,7 @@ def _is_overdue(task: Task) -> bool:
 def get_stats(db: Session) -> dict:
     """Return aggregate task counts."""
     archive_stale_tasks(db)
+    # Load all tasks once and compute counts in-memory for simplicity
     all_tasks = db.query(Task).all()
     return {
         "total": len(all_tasks),

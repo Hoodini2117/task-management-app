@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # ─── Enums ──────────────────────────────────────────────────────────────────────
 
+# Constrained string enums ensure only valid values reach the database
 class TaskStatus(str, Enum):
     """Valid task status values."""
     PENDING = "pending"
@@ -25,6 +26,7 @@ class TaskPriority(str, Enum):
 
 # ─── Shared Error Response ──────────────────────────────────────────────────────
 
+# Standard error envelope returned by all error handlers
 class ErrorResponse(BaseModel):
     """Standard API error response."""
     detail: str = Field(description="Human-readable error message")
@@ -32,6 +34,7 @@ class ErrorResponse(BaseModel):
 
 # ─── Validation Helpers ─────────────────────────────────────────────────────────
 
+# Pre-compiled regex patterns for reusable input validation
 _EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 _DATE_REGEX = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _TIME_REGEX = re.compile(r"^\d{2}:\d{2}$")
@@ -39,6 +42,7 @@ _TIME_REGEX = re.compile(r"^\d{2}:\d{2}$")
 
 # ─── Task Schemas ───────────────────────────────────────────────────────────────
 
+# Base schema with shared field validators inherited by TaskCreate and TaskUpdate
 class TaskBase(BaseModel):
     """Base task schema with shared validation."""
 
@@ -54,6 +58,7 @@ class TaskBase(BaseModel):
         return v
 
 
+# Schema for POST /api/tasks — validates all required fields for task creation
 class TaskCreate(TaskBase):
     """Schema for creating a new task."""
 
@@ -94,6 +99,7 @@ class TaskCreate(TaskBase):
         json_schema_extra={"examples": ["john@example.com"]},
     )
 
+    # Ensure due_date is a valid calendar date and not in the past
     @field_validator("due_date")
     @classmethod
     def validate_due_date(cls, v: str | None) -> str | None:
@@ -110,6 +116,7 @@ class TaskCreate(TaskBase):
             raise ValueError("Due date cannot be in the past")
         return v
 
+    # Validate 24-hour time format with bounds checking
     @field_validator("due_time")
     @classmethod
     def validate_due_time(cls, v: str | None) -> str | None:
@@ -123,6 +130,7 @@ class TaskCreate(TaskBase):
             raise ValueError("due_time has invalid hours or minutes")
         return v
 
+    # Normalize email to lowercase and validate against regex pattern
     @field_validator("assignee_email")
     @classmethod
     def validate_assignee_email(cls, v: str | None) -> str | None:
@@ -141,6 +149,7 @@ class TaskCreate(TaskBase):
             return None
         return v.strip()
 
+    # Coerce empty strings to None so the DB stores NULL instead of ""
     @field_validator("description")
     @classmethod
     def validate_description(cls, v: str | None) -> str | None:
@@ -150,6 +159,7 @@ class TaskCreate(TaskBase):
         return v
 
 
+# Schema for PUT /api/tasks/{id} — all fields optional for partial updates
 class TaskUpdate(TaskBase):
     """Schema for updating an existing task. All fields are optional."""
 
@@ -186,6 +196,7 @@ class TaskUpdate(TaskBase):
         description="Updated assignee email",
     )
 
+    # Update schema allows past dates (existing tasks may already have them)
     @field_validator("due_date")
     @classmethod
     def validate_due_date(cls, v: str | None) -> str | None:
@@ -234,6 +245,7 @@ class TaskUpdate(TaskBase):
 
 # ─── Task Response ──────────────────────────────────────────────────────────────
 
+# Serialization schema — converts ORM Task objects to JSON responses
 class TaskResponse(BaseModel):
     """Task response with all fields including computed counts."""
 
@@ -253,12 +265,14 @@ class TaskResponse(BaseModel):
     is_archived: bool = Field(description="Whether the task is archived")
     created_at: datetime = Field(description="Creation timestamp (UTC)")
     updated_at: datetime = Field(description="Last update timestamp (UTC)")
+    # Computed fields derived from relationship counts in the service layer
     comment_count: int = Field(default=0, description="Number of comments")
     activity_count: int = Field(default=0, description="Number of activity log entries")
 
 
 # ─── Stats Response ─────────────────────────────────────────────────────────────
 
+# Dashboard statistics — aggregated counts used by the frontend overview cards
 class StatsResponse(BaseModel):
     """Aggregate task statistics."""
 
@@ -272,6 +286,7 @@ class StatsResponse(BaseModel):
 
 # ─── Comment Schemas ────────────────────────────────────────────────────────────
 
+# Validate incoming comment creation requests
 class CommentCreate(BaseModel):
     """Schema for creating a new comment on a task."""
 
@@ -303,6 +318,7 @@ class CommentCreate(BaseModel):
         return stripped
 
 
+# Serialization schema for comment API responses
 class CommentResponse(BaseModel):
     """Comment response with all fields."""
 
@@ -317,6 +333,7 @@ class CommentResponse(BaseModel):
 
 # ─── Activity Log Schemas ───────────────────────────────────────────────────────
 
+# Serialization schema for activity log API responses
 class ActivityLogResponse(BaseModel):
     """Activity log entry response."""
 

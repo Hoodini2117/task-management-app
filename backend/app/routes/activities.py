@@ -8,9 +8,11 @@ from app.schemas import ActivityLogResponse, ErrorResponse
 from app.services import activity_service
 from app.services import task_service
 
+# Activities router — nested under /api/tasks/{task_id}/activities
 router = APIRouter(prefix="/api/tasks", tags=["Activities"])
 
 
+# Retrieve the full activity timeline for a task
 @router.get(
     "/{task_id}/activities",
     response_model=list[ActivityLogResponse],
@@ -23,6 +25,7 @@ router = APIRouter(prefix="/api/tasks", tags=["Activities"])
     responses={404: {"model": ErrorResponse, "description": "Task not found"}},
 )
 def list_activities(task_id: int, db: Session = Depends(get_db)):
+    # Verify task exists before querying activity logs
     task = task_service.get_task_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail=f"Task with id={task_id} not found")

@@ -20,14 +20,17 @@ from app.routes.activities import router as activities_router
 logger = logging.getLogger("taskly")
 
 
+# Lifespan context manager — runs setup on startup and cleanup on shutdown
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup/shutdown lifecycle."""
+    # Create all ORM-defined tables if they don't already exist
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created successfully")
     yield
 
 
+# Initialize FastAPI application with OpenAPI metadata
 app = FastAPI(
     title="Taskly — Task Management API",
     description=(
@@ -52,6 +55,7 @@ app = FastAPI(
     },
 )
 
+# CORS middleware — allow frontend dev servers to call the API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -68,11 +72,13 @@ app.add_middleware(
 
 # ─── Exception Handlers ────────────────────────────────────────────────────────
 
+# Transform Pydantic validation errors into structured 422 responses
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle Pydantic validation errors with clear, structured messages."""
     errors = []
     for err in exc.errors():
+        # Build a readable field path from the error location tuple
         field = " → ".join(str(loc) for loc in err.get("loc", []) if loc != "body")
         message = err.get("msg", "Validation error")
         errors.append(f"{field}: {message}" if field else message)
@@ -86,6 +92,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
+# Global catch-all — prevents unhandled exceptions from leaking stack traces
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Catch-all handler — prevents stack traces from leaking to clients."""
@@ -98,6 +105,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ─── Register Routers ──────────────────────────────────────────────────────────
 
+# Mount versioned API routers for tasks, comments, and activity logs
 app.include_router(tasks_router)
 app.include_router(comments_router)
 app.include_router(activities_router)
