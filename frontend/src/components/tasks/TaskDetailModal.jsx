@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  FaTimes, FaUser, FaEnvelope, FaCalendarAlt, FaClock,
+  FaTimes, FaUser, FaEnvelope, FaCalendarAlt,
   FaCommentDots, FaHistory, FaPaperPlane, FaTrash,
 } from 'react-icons/fa';
 import { getComments, createComment, deleteComment, getActivities } from '../../services/api';
