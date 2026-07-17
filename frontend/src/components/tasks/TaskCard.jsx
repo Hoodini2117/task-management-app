@@ -1,4 +1,4 @@
-import { FaTrash, FaCalendarAlt, FaClock, FaUser } from 'react-icons/fa';
+import { FaTrash, FaCalendarAlt, FaUser } from 'react-icons/fa';
 import { isOverdue, isDueToday } from '../../utils/dateUtils';
 
 const priorityConfig = {

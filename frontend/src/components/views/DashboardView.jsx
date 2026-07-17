@@ -1,7 +1,7 @@
 import StatsCards from '../stats/StatsCards';
 import QuickCreate from '../tasks/QuickCreate';
 import TaskCard from '../tasks/TaskCard';
-import { FaArrowRight, FaExclamationTriangle, FaClock, FaCheckCircle, FaCalendarDay, FaCalendarWeek, FaFire, FaUserFriends } from 'react-icons/fa';
+import { FaExclamationTriangle, FaClock, FaCheckCircle, FaCalendarDay, FaCalendarWeek, FaFire, FaUserFriends } from 'react-icons/fa';
 import { isOverdue, isDueToday, isDueThisWeek, isCompletedToday } from '../../utils/dateUtils';
 import { getPriorityLabel } from '../../utils/taskUtils';
 
