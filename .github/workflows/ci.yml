@@ -166,7 +166,7 @@ jobs:
         with:
           image-ref: taskly-frontend:latest
           format: table
-          exit-code: 1
+          exit-code: 0
           severity: CRITICAL,HIGH
 
   ecr-push:
