@@ -78,7 +78,7 @@ All engineering documentation is inside the `docs/` folder.
 
 ---
 
-## Infrastructure
+## Infra
 
 Terraform code will be located inside the `infra/` directory.
 
