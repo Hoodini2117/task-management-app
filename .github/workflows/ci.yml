@@ -170,7 +170,7 @@ jobs:
           severity: CRITICAL,HIGH
 
   ecr-push:
-    if: github.ref == 'ref/heads/main'
+    if: github.ref == 'refs/heads/main'
     name: Push Images to Amazon ECR
     needs: trivy-scan
     runs-on: ubuntu-latest
