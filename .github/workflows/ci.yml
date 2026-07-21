@@ -9,7 +9,7 @@ on:
 env:
   AWS_REGION: ap-south-1
 jobs:
-  backend:
+  backend-setup:
     name: backend validation
     runs-on: ubuntu-latest
 
@@ -133,3 +133,87 @@ jobs:
             ./frontend
       - name: Verify Images
         run: docker images
+  trivy-scan:
+    name: Scan Docker Images
+    needs: docker-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: |
+          docker build \
+            -t taskly-backend:latest \
+            ./backend
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            -t taskly-frontend:latest \
+            ./frontend
+
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: taskly-backend:latest
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: taskly-frontend:latest
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+  
+  ecr-push:
+    if: github.ref == 'ref/heads/main'
+    name: Push Images to Amazon ECR
+    needs: trivy-scan
+    runs-on: ubuntu-latest
+
+   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build Backend Image
+      run: |
+        docker build -t taskly-backend ./backend
+
+    - name: Build Frontend Image
+      run: |
+        docker build -t taskly-frontend ./frontend
+
+    - name: Tag Backend Image
+      run: |
+        docker tag taskly-backend:latest \
+        ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/taskly-backend:latest
+
+    - name: Tag Frontend Image
+      run: |
+        docker tag taskly-frontend:latest \
+        ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/taskly-frontend:latest
+
+    - name: Push Backend Image
+      run: |
+        docker push \
+        ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/taskly-backend:latest
+
+    - name: Push Frontend Image
+      run: |
+        docker push \
+        ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/taskly-frontend:latest
