@@ -72,7 +72,7 @@ git clone <repo>
 
 ---
 
-## Documentation
+## Documentations
 
 All engineering documentation is inside the `docs/` folder.
 
