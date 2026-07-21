@@ -54,7 +54,9 @@ app = FastAPI(
         500: {"description": "Internal Server Error — unexpected failure"},
     },
 )
-
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 # CORS middleware — allow frontend dev servers to call the API
 app.add_middleware(
     CORSMiddleware,
