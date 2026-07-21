@@ -154,7 +154,7 @@ jobs:
             ./frontend
 
       - name: Scan backend image
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: taskly-backend:latest
           format: table
@@ -162,7 +162,7 @@ jobs:
           severity: CRITICAL,HIGH
 
       - name: Scan frontend image
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: taskly-frontend:latest
           format: table
