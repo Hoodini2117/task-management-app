@@ -99,3 +99,14 @@ module "monitoring" {
   environment  = var.environment
   asg_name     = module.ec2.asg_name
 }
+module "ecr" {
+  source = "./modules/ecr"
+
+  backend_repository_name  = "taskly-backend"
+  frontend_repository_name = "taskly-frontend"
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}

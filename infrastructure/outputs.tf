@@ -62,3 +62,11 @@ output "sns_alerts_topic_arn" {
   description = "ARN of the SNS alerts topic"
   value       = module.monitoring.sns_topic_arn
 }
+#ecr outputs
+output "backend_ecr_repository_url" {
+  value = module.ecr.backend_repository_url
+}
+
+output "frontend_ecr_repository_url" {
+  value = module.ecr.frontend_repository_url
+}
