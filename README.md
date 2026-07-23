@@ -12,7 +12,7 @@ A brief description of the application.
 - Update tasks
 - Delete tasks
 - Track task status
-- ...
+- ...a
 
 ---
 
