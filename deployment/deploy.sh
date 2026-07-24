@@ -15,7 +15,11 @@ echo "========== Deployment Started =========="
 
 # Get running EC2 instance from ASG
 echo "Finding EC2 instance..."
-
+echo "=== Available Auto Scaling Groups ==="
+aws autoscaling describe-auto-scaling-groups \
+  --region "$AWS_REGION" \
+  --query "AutoScalingGroups[].AutoScalingGroupName" \
+  --output table
 INSTANCE_ID=$(aws autoscaling describe-auto-scaling-groups \
   --region "$REGION" \
   --auto-scaling-group-names "$ASG_NAME" \
