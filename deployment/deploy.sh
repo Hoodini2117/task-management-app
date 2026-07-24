@@ -20,10 +20,12 @@ aws autoscaling describe-auto-scaling-groups \
   --region "$AWS_REGION" \
   --query "AutoScalingGroups[].AutoScalingGroupName" \
   --output table
-INSTANCE_ID=$(aws autoscaling describe-auto-scaling-groups \
+INSTANCE_ID=$(aws ec2 describe-instances \
   --region "$REGION" \
-  --auto-scaling-group-names "$ASG_NAME" \
-  --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId | [0]" \
+  --filters \
+    "Name=tag:Name,Values=taskmanager-dev-app-instance" \
+    "Name=instance-state-name,Values=running" \
+  --query "Reservations[0].Instances[0].InstanceId" \
   --output text)
 echo "=== Debug: Auto Scaling Group ==="
 aws autoscaling describe-auto-scaling-groups \
