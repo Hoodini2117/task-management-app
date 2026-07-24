@@ -2,7 +2,7 @@
 
 set -e
 
-ALB_URL="http://your-alb-dns.amazonaws.com/health"
+ALB_URL="taskmanager-dev-alb-467082886.ap-south-1.elb.amazonaws.com"
 
 echo "Checking application health..."
 
