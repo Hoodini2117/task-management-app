@@ -21,7 +21,18 @@ INSTANCE_ID=$(aws autoscaling describe-auto-scaling-groups \
   --auto-scaling-group-names "$ASG_NAME" \
   --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId | [0]" \
   --output text)
+echo "=== Debug: Auto Scaling Group ==="
+aws autoscaling describe-auto-scaling-groups \
+  --auto-scaling-group-names "$ASG_NAME" \
+  --region "$AWS_REGION"
 
+echo ""
+echo "=== Debug: Running EC2 Instances ==="
+aws ec2 describe-instances \
+  --region "$AWS_REGION" \
+  --filters Name=instance-state-name,Values=running \
+  --query "Reservations[].Instances[].{ID:InstanceId,State:State.Name,Name:Tags[?Key=='Name']|[0].Value}" \
+  --output table
 # Exit if no instance exists
 if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
     echo "ERROR: No running EC2 instance found."
