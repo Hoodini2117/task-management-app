@@ -1,0 +1,92 @@
+#!/bin/bash
+
+set -e
+
+# AWS region
+REGION="ap-south-1"
+
+# Auto Scaling Group name
+ASG_NAME="taskmanager-dev-application-asg"
+
+# Production compose file
+COMPOSE_FILE="/home/ubuntu/task-management-app/deployment/docker-compose.yml"
+
+echo "========== Deployment Started =========="
+
+# Get running EC2 instance from ASG
+echo "Finding EC2 instance..."
+
+INSTANCE_ID=$(aws autoscaling describe-auto-scaling-groups \
+  --region "$REGION" \
+  --auto-scaling-group-names "$ASG_NAME" \
+  --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId | [0]" \
+  --output text)
+
+# Exit if no instance exists
+if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
+    echo "ERROR: No running EC2 instance found."
+    exit 1
+fi
+
+echo "Instance found: $INSTANCE_ID"
+
+# Wait until SSM reports the instance online
+echo "Waiting for SSM Agent..."
+
+until aws ssm describe-instance-information \
+    --region "$REGION" \
+    --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+    --query "InstanceInformationList[0].PingStatus" \
+    --output text | grep -q "Online"
+do
+    echo "SSM not ready yet..."
+    sleep 10
+done
+
+echo "SSM Agent is Online."
+
+# Execute deployment commands on EC2
+echo "Sending deployment command..."
+
+COMMAND_ID=$(aws ssm send-command \
+  --region "$REGION" \
+  --instance-ids "$INSTANCE_ID" \
+  --document-name "AWS-RunShellScript" \
+  --comment "GitHub Actions Deployment" \
+  --parameters "commands=[
+'docker compose -f $COMPOSE_FILE pull',
+'docker compose -f $COMPOSE_FILE up -d --remove-orphans',
+'docker image prune -af'
+]" \
+  --query "Command.CommandId" \
+  --output text)
+
+echo "Command ID: $COMMAND_ID"
+
+# Wait for deployment to complete
+echo "Waiting for deployment to finish..."
+
+aws ssm wait command-executed \
+    --region "$REGION" \
+    --command-id "$COMMAND_ID" \
+    --instance-id "$INSTANCE_ID"
+
+# Check deployment status
+STATUS=$(aws ssm list-command-invocations \
+    --region "$REGION" \
+    --command-id "$COMMAND_ID" \
+    --details \
+    --query "CommandInvocations[0].Status" \
+    --output text)
+
+echo "Deployment Status: $STATUS"
+
+# Exit with failure if deployment failed
+if [ "$STATUS" != "Success" ]; then
+    echo "Deployment Failed!"
+    exit 1
+fi
+
+echo "Deployment completed successfully."
+
+echo "========== Deployment Finished =========="

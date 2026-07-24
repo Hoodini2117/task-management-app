@@ -1,3 +1,13 @@
+variable "project_name" {
+  description = "Name of the project"
+  type        = string
+}
+
+variable "environment" {
+  description = "Deployment environment"
+  type        = string
+}
+
 variable "backend_repository_name" {
   description = "Name of the backend ECR repository"
   type        = string

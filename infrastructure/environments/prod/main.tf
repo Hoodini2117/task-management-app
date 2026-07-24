@@ -11,7 +11,7 @@ locals {
 
 # VPC module
 module "vpc" {
-  source = "./modules/vpc"
+  source = "../../modules/vpc"
 
   project_name             = var.project_name
   environment              = var.environment
@@ -24,7 +24,7 @@ module "vpc" {
 
 # Security Groups module
 module "security_groups" {
-  source = "./modules/security-groups"
+  source = "../../modules/security-groups"
 
   project_name = var.project_name
   environment  = var.environment
@@ -34,7 +34,7 @@ module "security_groups" {
 
 # IAM module
 module "iam" {
-  source = "./modules/iam"
+  source = "../../modules/iam"
 
   project_name = var.project_name
   environment  = var.environment
@@ -42,7 +42,7 @@ module "iam" {
 
 # ALB module
 module "alb" {
-  source = "./modules/alb"
+  source = "../../modules/alb"
 
   project_name      = var.project_name
   environment       = var.environment
@@ -55,7 +55,7 @@ module "alb" {
 
 # EC2 / Auto Scaling module
 module "ec2" {
-  source = "./modules/ec2"
+  source = "../../modules/ec2"
 
   project_name           = var.project_name
   environment            = var.environment
@@ -76,7 +76,7 @@ module "ec2" {
 
 # RDS module
 module "rds" {
-  source = "./modules/rds"
+  source = "../../modules/rds"
 
   project_name          = var.project_name
   environment           = var.environment
@@ -93,14 +93,16 @@ module "rds" {
 
 # Monitoring module
 module "monitoring" {
-  source = "./modules/monitoring"
+  source = "../../modules/monitoring"
 
   project_name = var.project_name
   environment  = var.environment
   asg_name     = module.ec2.asg_name
 }
+
+# ECR module
 module "ecr" {
-  source = "./modules/ecr"
+  source = "../../modules/ecr"
 
   project_name             = var.project_name
   environment              = var.environment

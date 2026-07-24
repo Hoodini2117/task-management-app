@@ -1,11 +1,11 @@
-# Fetches the latest Amazon Linux 2023 AMI
-data "aws_ami" "amazon_linux" {
+# Fetches the latest Ubuntu 24.04 LTS AMI from Canonical
+data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = ["099720109477"] # Canonical
 
   filter {
     name   = "name"
-    values = ["al2023-ami-*-x86_64"]
+    values = ["ubuntu/images/hvm-ssd-*/ubuntu-*-24.04-amd64-server-*"]
   }
 
   filter {
@@ -14,15 +14,15 @@ data "aws_ami" "amazon_linux" {
   }
 
   filter {
-    name   = "architecture"
-    values = ["x86_64"]
+    name   = "root-device-type"
+    values = ["ebs"]
   }
 }
 
 # Creates the launch template for application instances
 resource "aws_launch_template" "application_launch_template" {
   name_prefix   = "${var.project_name}-${var.environment}-app-"
-  image_id      = data.aws_ami.amazon_linux.id
+  image_id      = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
 
   iam_instance_profile {
