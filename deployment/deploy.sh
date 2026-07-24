@@ -6,7 +6,7 @@ set -e
 REGION="ap-south-1"
 
 # Auto Scaling Group name
-ASG_NAME="taskmanager-dev-application-asg"
+ASG_NAME="taskmanager-dev-asg"
 
 # Production compose file
 COMPOSE_FILE="/home/ubuntu/task-management-app/deployment/docker-compose.yml"
