@@ -12,10 +12,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.database import engine, Base
-from app.routes.tasks import router as tasks_router
-from app.routes.comments import router as comments_router
+from app.database import Base, engine
 from app.routes.activities import router as activities_router
+from app.routes.comments import router as comments_router
+from app.routes.tasks import router as tasks_router
 
 logger = logging.getLogger("taskly")
 
@@ -54,9 +54,13 @@ app = FastAPI(
         500: {"description": "Internal Server Error — unexpected failure"},
     },
 )
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
 # CORS middleware — allow frontend dev servers to call the API
 app.add_middleware(
     CORSMiddleware,
@@ -73,6 +77,7 @@ app.add_middleware(
 
 
 # ─── Exception Handlers ────────────────────────────────────────────────────────
+
 
 # Transform Pydantic validation errors into structured 422 responses
 @app.exception_handler(RequestValidationError)

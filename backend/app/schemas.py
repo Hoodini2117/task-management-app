@@ -1,24 +1,26 @@
 """Pydantic schemas for request validation and response serialization."""
 
 import re
-from datetime import datetime, date
-from enum import Enum
+from datetime import UTC, date, datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-
 # ─── Enums ──────────────────────────────────────────────────────────────────────
 
+
 # Constrained string enums ensure only valid values reach the database
-class TaskStatus(str, Enum):
+class TaskStatus(StrEnum):
     """Valid task status values."""
+
     PENDING = "pending"
     IN_PROGRESS = "in-progress"
     COMPLETED = "completed"
 
 
-class TaskPriority(str, Enum):
+class TaskPriority(StrEnum):
     """Valid task priority values."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -26,9 +28,11 @@ class TaskPriority(str, Enum):
 
 # ─── Shared Error Response ──────────────────────────────────────────────────────
 
+
 # Standard error envelope returned by all error handlers
 class ErrorResponse(BaseModel):
     """Standard API error response."""
+
     detail: str = Field(description="Human-readable error message")
 
 
@@ -41,6 +45,7 @@ _TIME_REGEX = re.compile(r"^\d{2}:\d{2}$")
 
 
 # ─── Task Schemas ───────────────────────────────────────────────────────────────
+
 
 # Base schema with shared field validators inherited by TaskCreate and TaskUpdate
 class TaskBase(BaseModel):
@@ -63,12 +68,14 @@ class TaskCreate(TaskBase):
     """Schema for creating a new task."""
 
     title: str = Field(
-        min_length=1, max_length=255,
+        min_length=1,
+        max_length=255,
         description="Task title (1–255 characters)",
         json_schema_extra={"examples": ["Design landing page"]},
     )
     description: str | None = Field(
-        default=None, max_length=2000,
+        default=None,
+        max_length=2000,
         description="Optional task description (max 2000 characters)",
     )
     status: TaskStatus = Field(
@@ -90,11 +97,13 @@ class TaskCreate(TaskBase):
         json_schema_extra={"examples": ["14:30"]},
     )
     assignee_name: str | None = Field(
-        default=None, max_length=255,
+        default=None,
+        max_length=255,
         description="Name of the person assigned to this task",
     )
     assignee_email: str | None = Field(
-        default=None, max_length=255,
+        default=None,
+        max_length=255,
         description="Email of the assignee",
         json_schema_extra={"examples": ["john@example.com"]},
     )
@@ -110,9 +119,9 @@ class TaskCreate(TaskBase):
             raise ValueError("due_date must be in YYYY-MM-DD format")
         try:
             parsed = date.fromisoformat(v)
-        except ValueError:
-            raise ValueError(f"Invalid date: {v}")
-        if parsed < date.today():
+        except ValueError as err:
+            raise ValueError(f"Invalid date: {v}") from err
+        if parsed < datetime.now(UTC).date():
             raise ValueError("Due date cannot be in the past")
         return v
 
@@ -164,11 +173,14 @@ class TaskUpdate(TaskBase):
     """Schema for updating an existing task. All fields are optional."""
 
     title: str | None = Field(
-        default=None, min_length=1, max_length=255,
+        default=None,
+        min_length=1,
+        max_length=255,
         description="Updated task title (1–255 characters)",
     )
     description: str | None = Field(
-        default=None, max_length=2000,
+        default=None,
+        max_length=2000,
         description="Updated task description (max 2000 characters)",
     )
     status: TaskStatus | None = Field(
@@ -188,11 +200,13 @@ class TaskUpdate(TaskBase):
         description="Updated due time in HH:MM format",
     )
     assignee_name: str | None = Field(
-        default=None, max_length=255,
+        default=None,
+        max_length=255,
         description="Updated assignee name",
     )
     assignee_email: str | None = Field(
-        default=None, max_length=255,
+        default=None,
+        max_length=255,
         description="Updated assignee email",
     )
 
@@ -207,8 +221,8 @@ class TaskUpdate(TaskBase):
             raise ValueError("due_date must be in YYYY-MM-DD format")
         try:
             date.fromisoformat(v)
-        except ValueError:
-            raise ValueError(f"Invalid date: {v}")
+        except ValueError as err:
+            raise ValueError(f"Invalid date: {v}") from err
         return v
 
     @field_validator("due_time")
@@ -245,6 +259,7 @@ class TaskUpdate(TaskBase):
 
 # ─── Task Response ──────────────────────────────────────────────────────────────
 
+
 # Serialization schema — converts ORM Task objects to JSON responses
 class TaskResponse(BaseModel):
     """Task response with all fields including computed counts."""
@@ -272,6 +287,7 @@ class TaskResponse(BaseModel):
 
 # ─── Stats Response ─────────────────────────────────────────────────────────────
 
+
 # Dashboard statistics — aggregated counts used by the frontend overview cards
 class StatsResponse(BaseModel):
     """Aggregate task statistics."""
@@ -286,16 +302,19 @@ class StatsResponse(BaseModel):
 
 # ─── Comment Schemas ────────────────────────────────────────────────────────────
 
+
 # Validate incoming comment creation requests
 class CommentCreate(BaseModel):
     """Schema for creating a new comment on a task."""
 
     author_name: str = Field(
-        min_length=1, max_length=255,
+        min_length=1,
+        max_length=255,
         description="Name of the comment author (1–255 characters)",
     )
     message: str = Field(
-        min_length=1, max_length=5000,
+        min_length=1,
+        max_length=5000,
         description="Comment message text (1–5000 characters)",
     )
 
@@ -332,6 +351,7 @@ class CommentResponse(BaseModel):
 
 
 # ─── Activity Log Schemas ───────────────────────────────────────────────────────
+
 
 # Serialization schema for activity log API responses
 class ActivityLogResponse(BaseModel):

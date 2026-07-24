@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import String, Text, DateTime, Boolean, Integer, ForeignKey
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -25,20 +25,18 @@ class Task(Base):
     assignee_name: Mapped[str | None] = mapped_column(String(255), default=None)
     assignee_email: Mapped[str | None] = mapped_column(String(255), default=None)
     # Timestamp set when task transitions to "completed" status
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), default=None
-    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     # Soft-delete flag — archived tasks are hidden from default views
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
     # Auto-updated via onupdate trigger on every modification
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     # One-to-many relationships — cascade delete removes children with the task
@@ -61,7 +59,7 @@ class Comment(Base):
     message: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
 
     # Back-reference to parent task
@@ -78,7 +76,7 @@ class ActivityLog(Base):
     action: Mapped[str] = mapped_column(Text, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
 
     task: Mapped["Task"] = relationship(back_populates="activity_logs")

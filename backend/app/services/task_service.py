@@ -1,10 +1,10 @@
-from datetime import datetime, timezone, timedelta, date
+from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import desc, func, or_
 from sqlalchemy.orm import Session
 
-from app.models import Task, ActivityLog
-from app.schemas import TaskCreate, TaskUpdate, TaskStatus
+from app.models import ActivityLog, Task
+from app.schemas import TaskCreate, TaskStatus, TaskUpdate
 
 # Completed tasks are auto-archived after this many days
 ARCHIVE_AFTER_DAYS = 10
@@ -63,7 +63,7 @@ def _task_to_response_dict(task: Task) -> dict:
 
 def archive_stale_tasks(db: Session) -> None:
     """Archive completed tasks older than ARCHIVE_AFTER_DAYS."""
-    cutoff = datetime.now(timezone.utc) - timedelta(days=ARCHIVE_AFTER_DAYS)
+    cutoff = datetime.now(UTC) - timedelta(days=ARCHIVE_AFTER_DAYS)
     # Find completed, non-archived tasks that passed the cutoff threshold
     stale = (
         db.query(Task)
@@ -134,7 +134,7 @@ def create_task(db: Session, task_data: TaskCreate) -> dict:
 
     # Auto-set completion timestamp if task is created as completed
     if data["status"] == TaskStatus.COMPLETED.value:
-        data["completed_at"] = datetime.now(timezone.utc)
+        data["completed_at"] = datetime.now(UTC)
 
     # Generate unique sequential task code (TSK-XXXX)
     seq, code = _next_task_code(db)
@@ -175,7 +175,7 @@ def update_task(db: Session, task_id: int, task_data: TaskUpdate) -> dict | None
         updates["status"] = new_status
 
         if new_status == TaskStatus.COMPLETED.value and old_status != TaskStatus.COMPLETED.value:
-            updates["completed_at"] = datetime.now(timezone.utc)
+            updates["completed_at"] = datetime.now(UTC)
             updates["is_archived"] = False
         elif new_status != TaskStatus.COMPLETED.value and old_status == TaskStatus.COMPLETED.value:
             updates["completed_at"] = None
@@ -188,7 +188,7 @@ def update_task(db: Session, task_id: int, task_data: TaskUpdate) -> dict | None
     for field, value in updates.items():
         setattr(task, field, value)
 
-    task.updated_at = datetime.now(timezone.utc)
+    task.updated_at = datetime.now(UTC)
     db.flush()
 
     # Activity logs for changes
@@ -230,13 +230,7 @@ def delete_task(db: Session, task_id: int) -> bool:
 def get_history(db: Session, skip: int = 0, limit: int = 200) -> list[dict]:
     """Return all tasks including archived, newest first."""
     archive_stale_tasks(db)
-    tasks = (
-        db.query(Task)
-        .order_by(desc(Task.created_at))
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    tasks = db.query(Task).order_by(desc(Task.created_at)).offset(skip).limit(limit).all()
     return [_task_to_response_dict(t) for t in tasks]
 
 
@@ -246,7 +240,7 @@ def _is_overdue(task: Task) -> bool:
         return False
     try:
         due = date.fromisoformat(task.due_date)
-        return due < date.today()
+        return due < datetime.now(UTC).date()
     except ValueError:
         return False
 
@@ -261,8 +255,7 @@ def get_stats(db: Session) -> dict:
         "pending": sum(1 for t in all_tasks if t.status == TaskStatus.PENDING.value),
         "in_progress": sum(1 for t in all_tasks if t.status == TaskStatus.IN_PROGRESS.value),
         "completed": sum(
-            1 for t in all_tasks
-            if t.status == TaskStatus.COMPLETED.value and not t.is_archived
+            1 for t in all_tasks if t.status == TaskStatus.COMPLETED.value and not t.is_archived
         ),
         "archived": sum(1 for t in all_tasks if t.is_archived),
         "overdue": sum(1 for t in all_tasks if _is_overdue(t)),

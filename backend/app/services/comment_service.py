@@ -1,7 +1,7 @@
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from app.models import Comment, ActivityLog
+from app.models import ActivityLog, Comment
 from app.schemas import CommentCreate
 
 

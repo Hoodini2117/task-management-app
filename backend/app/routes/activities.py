@@ -5,8 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
 from app.schemas import ActivityLogResponse, ErrorResponse
-from app.services import activity_service
-from app.services import task_service
+from app.services import activity_service, task_service
 
 # Activities router — nested under /api/tasks/{task_id}/activities
 router = APIRouter(prefix="/api/tasks", tags=["Activities"])

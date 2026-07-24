@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 # SQLite connection string — file-based DB in project root
 SQLALCHEMY_DATABASE_URL = "sqlite:///./task_manager.db"

@@ -5,8 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
 from app.schemas import (
-    TaskCreate, TaskUpdate, TaskResponse,
-    TaskStatus, TaskPriority, StatsResponse, ErrorResponse,
+    ErrorResponse,
+    StatsResponse,
+    TaskCreate,
+    TaskPriority,
+    TaskResponse,
+    TaskStatus,
+    TaskUpdate,
 )
 from app.services import task_service
 
@@ -26,17 +31,12 @@ router = APIRouter(prefix="/api/tasks", tags=["Tasks"])
     ),
 )
 def list_tasks(
-    status: TaskStatus | None = Query(
-        default=None, description="Filter by task status"
-    ),
-    priority: TaskPriority | None = Query(
-        default=None, description="Filter by priority level"
-    ),
-    include_archived: bool = Query(
-        default=False, description="Include archived tasks in results"
-    ),
+    status: TaskStatus | None = Query(default=None, description="Filter by task status"),
+    priority: TaskPriority | None = Query(default=None, description="Filter by priority level"),
+    include_archived: bool = Query(default=False, description="Include archived tasks in results"),
     search: str | None = Query(
-        default=None, max_length=200,
+        default=None,
+        max_length=200,
         description="Search across title, description, task code, assignee name/email",
     ),
     skip: int = Query(default=0, ge=0, description="Number of records to skip"),

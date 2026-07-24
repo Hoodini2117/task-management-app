@@ -5,8 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
 from app.schemas import CommentCreate, CommentResponse, ErrorResponse
-from app.services import comment_service
-from app.services import task_service
+from app.services import comment_service, task_service
 
 # Comments router — nested under /api/tasks/{task_id}/comments
 router = APIRouter(prefix="/api/tasks", tags=["Comments"])
