@@ -61,7 +61,7 @@ def health():
     return {"status": "ok"}
 
 
-# CORS middleware — allow frontend dev servers to call the API
+# CORS middleware — allow frontend dev servers to call the API()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
