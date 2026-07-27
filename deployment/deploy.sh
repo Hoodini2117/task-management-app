@@ -13,97 +13,128 @@ COMPOSE_FILE="/home/ubuntu/task-management-app/deployment/docker-compose.yml"
 
 echo "========== Deployment Started =========="
 
-# Get running EC2 instance from ASG
-echo "Finding EC2 instance..."
+echo "Finding EC2 instances..."
+
 echo "=== Available Auto Scaling Groups ==="
 aws autoscaling describe-auto-scaling-groups \
-  --region "$AWS_REGION" \
+  --region "$REGION" \
   --query "AutoScalingGroups[].AutoScalingGroupName" \
   --output table
-INSTANCE_ID=$(aws ec2 describe-instances \
+
+# ============================================================
+# CHANGE:
+# Instead of selecting the first running EC2 instance by tag,
+# query the Auto Scaling Group and retrieve ONLY the instances
+# that are currently InService.
+#
+# This prevents deploying to instances that are Terminating.
+# ============================================================
+INSTANCE_IDS=$(aws autoscaling describe-auto-scaling-groups \
+  --auto-scaling-group-names "$ASG_NAME" \
   --region "$REGION" \
-  --filters \
-    "Name=tag:Name,Values=taskmanager-dev-app-instance" \
-    "Name=instance-state-name,Values=running" \
-  --query "Reservations[0].Instances[0].InstanceId" \
+  --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
   --output text)
+
 echo "=== Debug: Auto Scaling Group ==="
 aws autoscaling describe-auto-scaling-groups \
   --auto-scaling-group-names "$ASG_NAME" \
-  --region "$AWS_REGION"
+  --region "$REGION"
 
 echo ""
 echo "=== Debug: Running EC2 Instances ==="
 aws ec2 describe-instances \
-  --region "$AWS_REGION" \
+  --region "$REGION" \
   --filters Name=instance-state-name,Values=running \
   --query "Reservations[].Instances[].{ID:InstanceId,State:State.Name,Name:Tags[?Key=='Name']|[0].Value}" \
   --output table
-# Exit if no instance exists
-if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
-    echo "ERROR: No running EC2 instance found."
+
+# ============================================================
+# CHANGE:
+# Check INSTANCE_IDS instead of INSTANCE_ID because we're now
+# deploying to every healthy InService instance.
+# ============================================================
+if [ -z "$INSTANCE_IDS" ] || [ "$INSTANCE_IDS" = "None" ]; then
+    echo "ERROR: No InService EC2 instances found."
     exit 1
 fi
 
-echo "Instance found: $INSTANCE_ID"
+echo ""
+echo "Instances selected for deployment:"
+echo "$INSTANCE_IDS"
 
-# Wait until SSM reports the instance online
-echo "Waiting for SSM Agent..."
-
-until aws ssm describe-instance-information \
-    --region "$REGION" \
-    --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
-    --query "InstanceInformationList[0].PingStatus" \
-    --output text | grep -q "Online"
+# ============================================================
+# CHANGE:
+# Loop through every InService instance.
+#
+# This ensures all active instances behind the ALB receive the
+# latest deployment.
+# ============================================================
+for INSTANCE_ID in $INSTANCE_IDS
 do
-    echo "SSM not ready yet..."
-    sleep 10
-done
+    echo ""
+    echo "===================================="
+    echo "Deploying to: $INSTANCE_ID"
+    echo "===================================="
 
-echo "SSM Agent is Online."
+    echo "Waiting for SSM Agent..."
 
-# Execute deployment commands on EC2
-echo "Sending deployment command..."
+    until aws ssm describe-instance-information \
+        --region "$REGION" \
+        --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+        --query "InstanceInformationList[0].PingStatus" \
+        --output text | grep -q "Online"
+    do
+        echo "SSM not ready yet..."
+        sleep 10
+    done
 
-COMMAND_ID=$(aws ssm send-command \
-  --region "$REGION" \
-  --instance-ids "$INSTANCE_ID" \
-  --document-name "AWS-RunShellScript" \
-  --comment "GitHub Actions Deployment" \
-  --parameters "commands=[
+    echo "SSM Agent is Online."
+
+    echo "Sending deployment command..."
+
+    COMMAND_ID=$(aws ssm send-command \
+      --region "$REGION" \
+      --instance-ids "$INSTANCE_ID" \
+      --document-name "AWS-RunShellScript" \
+      --comment "GitHub Actions Deployment" \
+      --parameters "commands=[
 'docker compose -f $COMPOSE_FILE pull',
 'docker compose -f $COMPOSE_FILE up -d --remove-orphans',
 'docker image prune -af'
 ]" \
-  --query "Command.CommandId" \
-  --output text)
+      --query "Command.CommandId" \
+      --output text)
 
-echo "Command ID: $COMMAND_ID"
+    echo "Command ID: $COMMAND_ID"
 
-# Wait for deployment to complete
-echo "Waiting for deployment to finish..."
+    echo "Waiting for deployment to finish..."
 
-aws ssm wait command-executed \
-    --region "$REGION" \
-    --command-id "$COMMAND_ID" \
-    --instance-id "$INSTANCE_ID"
+    aws ssm wait command-executed \
+        --region "$REGION" \
+        --command-id "$COMMAND_ID" \
+        --instance-id "$INSTANCE_ID"
 
-# Check deployment status
-STATUS=$(aws ssm list-command-invocations \
-    --region "$REGION" \
-    --command-id "$COMMAND_ID" \
-    --details \
-    --query "CommandInvocations[0].Status" \
-    --output text)
+    STATUS=$(aws ssm list-command-invocations \
+        --region "$REGION" \
+        --command-id "$COMMAND_ID" \
+        --details \
+        --query "CommandInvocations[0].Status" \
+        --output text)
 
-echo "Deployment Status: $STATUS"
+    echo "Deployment Status on $INSTANCE_ID: $STATUS"
 
-# Exit with failure if deployment failed
-if [ "$STATUS" != "Success" ]; then
-    echo "Deployment Failed!"
-    exit 1
-fi
+    if [ "$STATUS" != "Success" ]; then
+        echo "Deployment failed on $INSTANCE_ID"
+        exit 1
+    fi
 
-echo "Deployment completed successfully."
+    echo "Deployment completed successfully on $INSTANCE_ID"
+
+done
+
+echo ""
+echo "===================================="
+echo "Deployment completed on all instances."
+echo "===================================="
 
 echo "========== Deployment Finished =========="
